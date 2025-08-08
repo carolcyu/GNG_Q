@@ -1,0 +1,15 @@
+body {
+  background-color: black;
+}
+.jspsych-display-element {
+  font-size: 28px;
+  color: white;
+}
+.jspsych-content {
+  max-width: 65%; 
+}
+img {  
+  width: 25%;
+  height: auto;
+  object-fit: contain;
+}
