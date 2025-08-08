@@ -5,9 +5,9 @@
     <script src="jspsych/jspsych.js"></script>
     <script src="jspsych/plugin-image-keyboard-response.js"></script>
     <script src="jspsych/plugin-html-keyboard-response.js"></script>
-    <script src="jspsych/plugin-preload.js"></script>
     <link href="jspsych/jspsych.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="jspsych/my_experiment_style_GNG.css">
+    <script src="./jspsych/plugin-html-button-response.js"></script>
   </head> 
   <body></body>
   <script>
@@ -22,52 +22,50 @@
 /* create timeline */
     var timeline = [];
 
- /* preload images */
- var preload = {
-      type: jsPsychPreload,
-      images: ['img/blue.png', 'img/orange.png']
-    };
-    timeline.push(preload);
-
     /* define welcome message trial */
     var welcome = {
-      type: jsPsychHtmlKeyboardResponse,
-      stimulus: "Welcome to another Task! </p> <p>Press any button for instructions. </p>"
+      type: jsPsychHtmlButtonResponse,
+      stimulus: "Welcome to another Task! </p> <p>Press any button for instructions. </p>",
+      choices: ['NEXT'],
     };
     timeline.push(welcome);
 
     /* define instructions trial */
     var instructions = {
-      type: jsPsychHtmlKeyboardResponse,
+      type: jsPsychHtmlButtonResponse,
       stimulus: `
         <p>In this experiment, a circle will appear in the center of the screen.</p>
       `,
+      choices: ['NEXT'],
     };
      timeline.push(instructions);
 
     var instructions1 = {
-      type: jsPsychHtmlKeyboardResponse,
+      type: jsPsychHtmlButtonResponse,
       stimulus: `
         <p>If the circle is <strong>blue</strong>, <u>press the letter F key</u> as fast as you can.<div class='left center-content'><img src='img/blue.png'></p> 
           </img><p class='small'><p style="color: dodgerblue;"><strong>Press the F key</p></strong></p>
       `,
+      choices: ['NEXT'],
     };
      timeline.push(instructions1);
 
       var instructions2 = {
-      type: jsPsychHtmlKeyboardResponse,
+      type: jsPsychHtmlButtonResponse,
       stimulus: `
         <p>If the circle is <strong>orange</strong>, <u>do not press any key</u>.</p></div><div class='right center-content'><img src='img/orange.png'></img><p class='small'><p style="color: coral;"><strong>Do not press a key</strong></p></div>
         <br><br><p><i>When you are ready, press any key to begin.</i></p>
       `,
+        choices: ['NEXT'],
       post_trial_gap: 1000
     };
      timeline.push(instructions2);
 
 /*questions for the examiner*/
 var questions = {
-      type: jsPsychHtmlKeyboardResponse,
-      stimulus: "<p>If you have questions or concerns, please signal to the examiner. </p> <p>If not, press any button to continue. </p>"
+      type: jsPsychHtmlButtonResponse,
+      stimulus: "<p>If you have questions or concerns, please signal to the examiner. </p> <p>If not, press any button to continue. </p>",
+  choices: ['NEXT'],
     };
     timeline.push(questions);
 
