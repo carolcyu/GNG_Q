@@ -43,14 +43,14 @@ Qualtrics.SurveyEngine.addOnload(function()
 	document.head.appendChild(styleSheet);
 
 	// GitHub repository path for GNG
-	window.task_github = "https://carolcyu.github.io/GNG_MRI/";
+	window.task_github = "https://carolcyu.github.io/GNG_Q/";
 
 	// Load necessary jsPsych scripts
 	var scripts = [
-		"https://carolcyu.github.io/GNG_MRI/jspsych/jspsych.js",
-		"https://carolcyu.github.io/GNG_MRI/jspsych/plugin-image-keyboard-response.js",
-		"https://carolcyu.github.io/GNG_MRI/jspsych/plugin-html-keyboard-response.js",
-        "https://carolcyu.github.io/GNG_MRI/jspsych/plugin-html-button-response.js"
+		"https://carolcyu.github.io/GNG_Q/jspsych/jspsych.js",
+		"https://carolcyu.github.io/GNG_Q/jspsych/plugin-image-keyboard-response.js",
+		"https://carolcyu.github.io/GNG_Q/jspsych/plugin-html-keyboard-response.js",
+        "https://carolcyu.github.io/GNG_Q/jspsych/plugin-html-button-response.js"
 	];
 
 	var loaded_scripts = 0;
@@ -84,24 +84,13 @@ Qualtrics.SurveyEngine.addOnload(function()
 			});
 
 			// =====================================================================
-			// ==      ROBUST KEYBOARD LISTENER (DO NOT CHANGE)       ==
+			// ==      ROBUST KEYBOARD LISTENER (FROM WORKING IFAD FILE)      ==
 			// =====================================================================
 			setTimeout(function() {
 				window.qualtricsKeyboardListener = function(event) {
 					var keyPressed = event.key;
-					var currentTrial = jsPsych.getCurrentTrial();
-
 					try {
-						// This logic handles both instruction screens and the actual task
-						if (currentTrial && currentTrial.data.task === 'response') {
-							// During the task, only the 'f' key should be registered as a response
-							if (keyPressed.toLowerCase() === 'f') {
-								jsPsych.finishTrial({ response: keyPressed });
-							}
-						} else {
-							// For instructions or debriefing, any key press will advance the trial
-							jsPsych.finishTrial({ response: keyPressed });
-						}
+						jsPsych.finishTrial({ response: keyPressed });
 					} catch (e) {
 						console.warn("Key press " + keyPressed + " ignored on current trial.");
 					}
@@ -143,14 +132,16 @@ Qualtrics.SurveyEngine.addOnload(function()
 			var test_block = {
 				type: jsPsychImageKeyboardResponse,
 				stimulus: jsPsych.timelineVariable('stimulus'),
-				choices: "NO_KEYS", // The global listener handles all key presses
+				choices: "NO_KEYS", // The global listener handles key presses
 				trial_duration: 1000,
 				data: {
 					task: 'response',
 					correct_response: jsPsych.timelineVariable('correct_response')
 				},
 				on_finish: function(data){
-					// The global listener provides the response, now we check if it was correct
+					// The listener passes the key press to 'data.response'.
+					// Now, we check if the response was correct.
+					// A null response is correct for the orange circle.
 					data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
 				}
 			};
@@ -158,7 +149,7 @@ Qualtrics.SurveyEngine.addOnload(function()
 			var test_procedure = {
 				timeline: [fixation, test_block],
 				timeline_variables: test_stimuli,
-				repetitions: 20,
+				repetitions: 20, // 20 repetitions as seen in index_GNG.html
 				randomize_order: true
 			};
 			timeline.push(test_procedure);
