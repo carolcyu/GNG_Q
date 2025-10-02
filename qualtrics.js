@@ -47,10 +47,10 @@ Qualtrics.SurveyEngine.addOnload(function()
 
 	// Load necessary jsPsych scripts
 	var scripts = [
-		"https://carolcyu.github.io/GNG_MRI/jspsych/jspsych.js",
-		"https://carolcyu.github.io/GNG_MRI/jspsych/plugin-image-keyboard-response.js",
-		"https://carolcyu.github.io/GNG_MRI/jspsych/plugin-html-keyboard-response.js",
-        "https://carolcyu.github.io/GNG_MRI/jspsych/plugin-html-button-response.js"
+		"https://carolcyu.github.io/GNG_Q/jspsych/jspsych.js",
+		"https://carolcyu.github.io/GNG_Q/jspsych/plugin-image-keyboard-response.js",
+		"https://carolcyu.github.io/GNG_Q/jspsych/plugin-html-keyboard-response.js",
+        "https://carolcyu.github.io/GNG_Q/jspsych/plugin-html-button-response.js"
 	];
 
 	var loaded_scripts = 0;
