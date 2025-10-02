@@ -43,14 +43,14 @@ Qualtrics.SurveyEngine.addOnload(function()
 	document.head.appendChild(styleSheet);
 
 	// GitHub repository path for GNG
-	window.task_github = "https://carolcyu.github.io/GNG_Q/";
+	window.task_github = "https://carolcyu.github.io/GNG_MRI/";
 
 	// Load necessary jsPsych scripts
 	var scripts = [
-		"https://carolcyu.github.io/GNG_Q/jspsych/jspsych.js",
-		"https://carolcyu.github.io/GNG_Q/jspsych/plugin-image-keyboard-response.js",
-		"https://carolcyu.github.io/GNG_Q/jspsych/plugin-html-keyboard-response.js",
-        "https://carolcyu.github.io/GNG_Q/jspsych/plugin-html-button-response.js"
+		"https://carolcyu.github.io/GNG_MRI/jspsych/jspsych.js",
+		"https://carolcyu.github.io/GNG_MRI/jspsych/plugin-image-keyboard-response.js",
+		"https://carolcyu.github.io/GNG_MRI/jspsych/plugin-html-keyboard-response.js",
+        "https://carolcyu.github.io/GNG_MRI/jspsych/plugin-html-button-response.js"
 	];
 
 	var loaded_scripts = 0;
@@ -75,102 +75,4 @@ Qualtrics.SurveyEngine.addOnload(function()
 				display_element: 'display_stage',
 				on_finish: function() {
 					document.removeEventListener('keydown', window.qualtricsKeyboardListener);
-					var gng_data = jsPsych.data.get().json();
-					// Save data to Qualtrics Embedded Data field "GNG"
-					Qualtrics.SurveyEngine.setEmbeddedData("GNG", gng_data);
-					jQuery('#display_stage').remove();
-					qthis.clickNextButton();
-				}
-			});
-
-			// =====================================================================
-			// ==      ROBUST KEYBOARD LISTENER (FROM WORKING IFAD FILE)      ==
-			// =====================================================================
-			setTimeout(function() {
-				window.qualtricsKeyboardListener = function(event) {
-					var keyPressed = event.key;
-					try {
-						jsPsych.finishTrial({ response: keyPressed });
-					} catch (e) {
-						console.warn("Key press " + keyPressed + " ignored on current trial.");
-					}
-				};
-				document.addEventListener('keydown', window.qualtricsKeyboardListener);
-			}, 1500);
-
-			// --- GNG TASK TIMELINE DEFINITION ---
-			var timeline = [];
-
-			var instructions = {
-				type: jsPsychHtmlKeyboardResponse,
-				stimulus: `
-					<p>Welcome to the Go/No-Go Task.</p>
-					<p>In this experiment, different circles will appear in the center of the screen.</p>
-					<p>If the circle is <strong>blue</strong>, you should press the 'F' key as quickly as possible.</p>
-					<p>If the circle is <strong>orange</strong>, you should <strong>not</strong> press any key.</p>
-					<p>Press any key to begin.</p>`
-			};
-			timeline.push(instructions);
-			
-			var MRIstart = { type: jsPsychHtmlKeyboardResponse, stimulus: "<p> Please wait while the scanner starts up. This will take 10 seconds. </strong></p>", choices: "NO_KEYS", trial_duration: 10000, prompt: "<p> A cross (+) will appear when the task starts. </p>" };
-			timeline.push(MRIstart);
-
-			var test_stimuli = [
-				{ stimulus: window.task_github + "img/blue.png", correct_response: 'f' },
-				{ stimulus: window.task_github + "img/orange.png", correct_response: null }
-			];
-
-			var fixation = {
-				type: jsPsychHtmlKeyboardResponse,
-				stimulus: '<div style="font-size:60px;">+</div>',
-				choices: "NO_KEYS",
-				trial_duration: function(){
-					return jsPsych.randomization.sampleWithoutReplacement([500, 750, 1000, 1250, 1500, 1750, 2000], 1)[0];
-				}
-			};
-
-			var test_block = {
-				type: jsPsychImageKeyboardResponse,
-				stimulus: jsPsych.timelineVariable('stimulus'),
-				choices: "NO_KEYS", // The global listener handles key presses
-				trial_duration: 1000,
-				data: {
-					task: 'response',
-					correct_response: jsPsych.timelineVariable('correct_response')
-				},
-				on_finish: function(data){
-					// The listener passes the key press to 'data.response'.
-					// Now, we check if the response was correct.
-					// A null response is correct for the orange circle.
-					data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
-				}
-			};
-
-			var test_procedure = {
-				timeline: [fixation, test_block],
-				timeline_variables: test_stimuli,
-				repetitions: 20, // 20 repetitions as seen in index_GNG.html
-				randomize_order: true
-			};
-			timeline.push(test_procedure);
-
-			var debrief_block = {
-				type: jsPsychHtmlKeyboardResponse,
-				stimulus: function() {
-					var trials = jsPsych.data.get().filter({task: 'response'});
-					var correct_trials = trials.filter({correct: true});
-					var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
-					var rt = Math.round(correct_trials.select('rt').mean());
-					return `<p>You responded correctly on ${accuracy}% of the trials.</p><p>Your average response time for correct trials was ${rt}ms.</p><p>Press any key to complete the experiment.</p>`;
-				}
-			};
-			timeline.push(debrief_block);
-
-			jsPsych.run(timeline);
-
-		} catch (error) {
-			console.error(error);
-			jQuery('#display_stage').html('<p style="color: red;">A critical error occurred. Please contact the study administrator.</p>');
-		}
-	}
-});
+					var gng_data = jsPsych.
