@@ -43,7 +43,7 @@ Qualtrics.SurveyEngine.addOnload(function()
 	document.head.appendChild(styleSheet);
 
 	// GitHub repository path for GNG
-	window.task_github = "https://carolcyu.github.io/GNG_MRI/";
+	window.task_github = "https://carolcyu.github.io/GNG_Q/";
 
 	// Load necessary jsPsych scripts
 	var scripts = [
