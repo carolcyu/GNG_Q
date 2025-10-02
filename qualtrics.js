@@ -42,14 +42,15 @@ Qualtrics.SurveyEngine.addOnload(function()
 	styleSheet.innerText = css;
 	document.head.appendChild(styleSheet);
 
-	// GitHub repository path for EFAD
-	window.task_github = "https://carolcyu.github.io/EFAD_MRI/";
+	// GitHub repository path for GNG
+	window.task_github = "https://carolcyu.github.io/GNG_MRI/";
 
 	// Load necessary jsPsych scripts
 	var scripts = [
-		"https://carolcyu.github.io/EFAD_MRI/jspsych/jspsych.js",
-		"https://carolcyu.github.io/EFAD_MRI/jspsych/plugin-image-keyboard-response.js",
-		"https://carolcyu.github.io/EFAD_MRI/jspsych/plugin-html-keyboard-response.js"
+		"https://carolcyu.github.io/GNG_MRI/jspsych/jspsych.js",
+		"https://carolcyu.github.io/GNG_MRI/jspsych/plugin-image-keyboard-response.js",
+		"https://carolcyu.github.io/GNG_MRI/jspsych/plugin-html-keyboard-response.js",
+        "https://carolcyu.github.io/GNG_MRI/jspsych/plugin-html-button-response.js"
 	];
 
 	var loaded_scripts = 0;
@@ -74,9 +75,9 @@ Qualtrics.SurveyEngine.addOnload(function()
 				display_element: 'display_stage',
 				on_finish: function() {
 					document.removeEventListener('keydown', window.qualtricsKeyboardListener);
-					var efad_data = jsPsych.data.get().json();
-					// Save data to Qualtrics Embedded Data field "EFAD"
-					Qualtrics.SurveyEngine.setEmbeddedData("EFAD", efad_data);
+					var gng_data = jsPsych.data.get().json();
+					// Save data to Qualtrics Embedded Data field "GNG"
+					Qualtrics.SurveyEngine.setEmbeddedData("GNG", gng_data);
 					jQuery('#display_stage').remove();
 					qthis.clickNextButton();
 				}
@@ -89,7 +90,16 @@ Qualtrics.SurveyEngine.addOnload(function()
 				window.qualtricsKeyboardListener = function(event) {
 					var keyPressed = event.key;
 					try {
-						jsPsych.finishTrial({ response: keyPressed });
+						// For GNG, the response is case-insensitive 'f'
+						if (keyPressed.toLowerCase() === 'f') {
+							jsPsych.finishTrial({ response: keyPressed });
+						} else {
+							// Allow other keys (like Enter or space) to advance instructions
+							var currentTrial = jsPsych.getCurrentTrial();
+							if (currentTrial && currentTrial.type === jsPsychHtmlKeyboardResponse) {
+								jsPsych.finishTrial({ response: keyPressed });
+							}
+						}
 					} catch (e) {
 						console.warn("Key press " + keyPressed + " ignored on current trial.");
 					}
@@ -97,49 +107,70 @@ Qualtrics.SurveyEngine.addOnload(function()
 				document.addEventListener('keydown', window.qualtricsKeyboardListener);
 			}, 1500);
 
-			// --- EFAD TASK TIMELINE DEFINITION ---
+			// --- GNG TASK TIMELINE DEFINITION ---
 			var timeline = [];
-			var welcome = { type: jsPsychHtmlKeyboardResponse, stimulus: " <p>Welcome to the Emotion Rating Task! </p> <p>Press any button for instructions. </p>" };
-			timeline.push(welcome);
 
-			var instructions = { type: jsPsychHtmlKeyboardResponse, stimulus: "<p>In this task, an image will appear on the screen.</p><p>Using the response pad, please rate <strong>HOW a picture makes you feel</strong>, as quickly as you can.</p>", post_trial_gap: 1000 };
+			var instructions = {
+				type: jsPsychHtmlKeyboardResponse,
+				stimulus: `
+					<p>Welcome to the Go/No-Go Task.</p>
+					<p>In this experiment, different circles will appear in the center of the screen.</p>
+					<p>If the circle is <strong>blue</strong>, you should press the 'F' key as quickly as possible.</p>
+					<p>If the circle is <strong>orange</strong>, you should <strong>not</strong> press any key.</p>
+					<p>Press any key to begin.</p>`
+			};
 			timeline.push(instructions);
-
-			var instructions2 = { type: jsPsychHtmlKeyboardResponse, stimulus: "<p>If the picture makes you feel...</p> <p><strong>Very negative</strong>, press the button 1</p><p><strong>Negative</strong>, press the button 2</p><p><strong>Positive</strong>, press the button 3</p> <p><strong>Very positive</strong>, press the button 4.</p><p> <img src='" + window.task_github + "img/response_key.png' alt='Key'></div></p>", post_trial_gap: 1000 };
-			timeline.push(instructions2);
-
-			var questions = { type: jsPsychHtmlKeyboardResponse, stimulus: "<p>If you have questions or concerns, please signal to the examiner. </p> <p>If not, press any key to continue. </p>" };
-			timeline.push(questions);
 			
 			var MRIstart = { type: jsPsychHtmlKeyboardResponse, stimulus: "<p> Please wait while the scanner starts up. This will take 10 seconds. </strong></p>", choices: "NO_KEYS", trial_duration: 10000, prompt: "<p> A cross (+) will appear when the task starts. </p>" };
 			timeline.push(MRIstart);
 
 			var test_stimuli = [
-				{stimulus: window.task_github + 'iaps_neg/1525.jpg'}, {stimulus: window.task_github + 'iaps_neg/2345_1.jpg'}, {stimulus: window.task_github + 'iaps_neg/3150.jpg'},
-                {stimulus: window.task_github + 'iaps_neg/3170.jpg'}, {stimulus: window.task_github + 'iaps_neg/7380.jpg'}, {stimulus: window.task_github + 'iaps_neg/9140.jpg'},
-                {stimulus: window.task_github + 'iaps_neg/9184.jpg'}, {stimulus: window.task_github + 'iaps_neg/9301.jpg'}, {stimulus: window.task_github + 'iaps_neg/9326.jpg'},
-                {stimulus: window.task_github + 'iaps_neg/9611.jpg'}, {stimulus: window.task_github + 'iaps_neg/9903.jpg'}, {stimulus: window.task_github + 'iaps_neut/6150.jpg'},
-                {stimulus: window.task_github + 'iaps_neut/7001.jpg'}, {stimulus: window.task_github + 'iaps_neut/7002.jpg'}, {stimulus: window.task_github + 'iaps_neut/7009.jpg'},
-                {stimulus: window.task_github + 'iaps_neut/7026.jpg'}, {stimulus: window.task_github + 'iaps_neut/7052.jpg'}, {stimulus: window.task_github + 'iaps_neut/7055.jpg'},
-                {stimulus: window.task_github + 'iaps_neut/7080.jpg'}, {stimulus: window.task_github + 'iaps_neut/7100.jpg'}, {stimulus: window.task_github + 'iaps_neut/7150.jpg'},
-                {stimulus: window.task_github + 'iaps_neut/7705.jpg'}, {stimulus: window.task_github + 'sdvp/3068.jpg'}, {stimulus: window.task_github + 'sdvp/6570.jpg'},
-                {stimulus: window.task_github + 'sdvp/SDVPS_1.jpg'}, {stimulus: window.task_github + 'sdvp/SDVPS_2.jpg'}, {stimulus: window.task_github + 'sdvp/SDVPS_3.jpg'},
-                {stimulus: window.task_github + 'sdvp/SDVPS_4.jpg'}, {stimulus: window.task_github + 'sdvp/SDVPS_5.jpg'}, {stimulus: window.task_github + 'sdvp/SDVPS_6.jpg'},
-                {stimulus: window.task_github + 'sdvp/SDVPS_7.jpg'}, {stimulus: window.task_github + 'sdvp/SDVPS_8.jpg'}, {stimulus: window.task_github + 'iaps_pos/1463.jpg'},
-                {stimulus: window.task_github + 'iaps_pos/1811.jpg'}, {stimulus: window.task_github + 'iaps_pos/2071.jpg'}, {stimulus: window.task_github + 'iaps_pos/2154.jpg'},
-                {stimulus: window.task_github + 'iaps_pos/4610.jpg'}, {stimulus: window.task_github + 'iaps_pos/5480.jpg'}, {stimulus: window.task_github + 'iaps_pos/5829.jpg'},
-                {stimulus: window.task_github + 'iaps_pos/7400.jpg'}, {stimulus: window.task_github + 'iaps_pos/7492.jpg'}, {stimulus: window.task_github + 'iaps_pos/8380.jpg'},
-                {stimulus: window.task_github + 'iaps_pos/8503.jpg'}
+				{ stimulus: window.task_github + "img/blue.png", correct_response: 'f' },
+				{ stimulus: window.task_github + "img/orange.png", correct_response: null }
 			];
 
-			var fixation = { type: jsPsychHtmlKeyboardResponse, stimulus: '<div style="font-size:60px;">+</div>', choices: "NO_KEYS", trial_duration: 1000 };
-			var test = { type: jsPsychImageKeyboardResponse, stimulus: jsPsych.timelineVariable('stimulus'), choices: "NO_KEYS", trial_duration: 2000, stimulus_height: 650 };
-			var response = { type: jsPsychHtmlKeyboardResponse, stimulus: "<p>How would you rate this image?</p>", choices: "NO_KEYS", trial_duration: 3000 };
+			var fixation = {
+				type: jsPsychHtmlKeyboardResponse,
+				stimulus: '<div style="font-size:60px;">+</div>',
+				choices: "NO_KEYS",
+				trial_duration: function(){
+					return jsPsych.randomization.sampleWithoutReplacement([500, 750, 1000, 1250, 1500, 1750, 2000], 1)[0];
+				}
+			};
 
-			var test_procedure = { timeline: [fixation, test, response], timeline_variables: test_stimuli, repetitions: 1, randomize_order: false, post_trial_gap: 500 };
+			var test_block = {
+				type: jsPsychImageKeyboardResponse,
+				stimulus: jsPsych.timelineVariable('stimulus'),
+				choices: "NO_KEYS", // The global listener handles the 'f' key
+				trial_duration: 1000,
+				data: {
+					task: 'response',
+					correct_response: jsPsych.timelineVariable('correct_response')
+				},
+				on_finish: function(data){
+					// 'response' will be null if no key is pressed, or 'f' if pressed
+					data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
+				}
+			};
+
+			var test_procedure = {
+				timeline: [fixation, test_block],
+				timeline_variables: test_stimuli,
+				repetitions: 20, // As specified in index_GNG.html
+				randomize_order: true
+			};
 			timeline.push(test_procedure);
 
-			var debrief_block = { type: jsPsychHtmlKeyboardResponse, stimulus: function() { var trials = jsPsych.data.get(); var rt = Math.round(trials.select('rt').mean()); return `<p>Your average response time was ${rt}ms.</p><p>Press any key to complete the experiment. Thank you for your time!</p>`; } };
+			var debrief_block = {
+				type: jsPsychHtmlKeyboardResponse,
+				stimulus: function() {
+					var trials = jsPsych.data.get().filter({task: 'response'});
+					var correct_trials = trials.filter({correct: true});
+					var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
+					var rt = Math.round(correct_trials.select('rt').mean());
+					return `<p>You responded correctly on ${accuracy}% of the trials.</p><p>Your average response time for correct trials was ${rt}ms.</p><p>Press any key to complete the experiment.</p>`;
+				}
+			};
 			timeline.push(debrief_block);
 
 			jsPsych.run(timeline);
