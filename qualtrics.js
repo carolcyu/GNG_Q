@@ -125,7 +125,7 @@ Qualtrics.SurveyEngine.addOnload(function()
 				stimulus: '<div style="font-size:60px;">+</div>',
 				choices: "NO_KEYS",
 				trial_duration: function(){
-					return jsPsych.randomization.sampleWithoutReplacement([500, 750, 1000, 1250, 1500, 1750, 2000], 1)[0];
+					return jsPsych.randomization.sampleWithoutReplacement([500, 750, 1000], 1)[0];
 				}
 			};
 
@@ -133,7 +133,9 @@ Qualtrics.SurveyEngine.addOnload(function()
 				type: jsPsychImageKeyboardResponse,
 				stimulus: jsPsych.timelineVariable('stimulus'),
 				choices: "NO_KEYS", // The global listener handles all key presses
-				trial_duration: 1000,
+				trial_duration: function(){
+					return jsPsych.randomization.sampleWithoutReplacement([2000, 3000, 4000], 1)[0];
+				},
 				data: {
 					task: 'response',
 					correct_response: jsPsych.timelineVariable('correct_response')
@@ -149,7 +151,7 @@ Qualtrics.SurveyEngine.addOnload(function()
 			var test_procedure = {
 				timeline: [fixation, test_block],
 				timeline_variables: test_stimuli,
-				repetitions: 20,
+				repetitions: 200,
 				randomize_order: true
 			};
 			timeline.push(test_procedure);
