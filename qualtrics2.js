@@ -240,7 +240,7 @@ function initExp(){
     /* define welcome message trial */
     var welcome = {
       type: jsPsychHtmlKeyboardResponse,
-      stimulus: "<p>Welcome to the Go/No-Go Task.</p><p>In this experiment, different circles will appear in the center of the screen.</p><p>Press any key to continue.</p>",
+      stimulus: "<p>Welcome to the Go/No-Go Task.</p><p>In this experiment, different circles will appear in the center of the screen.</p><br><p>Press any key to continue.</p>",
       choices: "ALL_KEYS",
       response_ends_trial: true
     };
@@ -249,7 +249,7 @@ function initExp(){
     /* define instructions trial */
     var instructions = {
       type: jsPsychHtmlKeyboardResponse,
-      stimulus: "<p>If the circle is <strong>blue</strong>, you should press the '1' key as quickly as possible.</p><br><p>If the circle is <strong>orange</strong>, you should <strong>not</strong> press any key.</p><p>Press any key to begin.</p>",
+      stimulus: "<p>If the circle is <strong>blue</strong>, you should press the '1' key as quickly as possible.</p><br><p>If the circle is <strong>orange</strong>, you should <strong>not</strong> press any key.</p><br><p>Press any key to begin.</p>",
       choices: "ALL_KEYS",
       response_ends_trial: true,
       post_trial_gap: 1000
@@ -259,7 +259,7 @@ function initExp(){
 /*questions for the examiner*/
 var questions = {
       type: jsPsychHtmlKeyboardResponse,
-      stimulus: "<p>If you have questions or concerns, please signal to the examiner. </p> <p>If not, press any button to continue. </p>"
+      stimulus: "<p>If you have questions or concerns, please signal to the examiner. </p><br><p>If not, press any button to continue. </p>"
     };
     timeline.push(questions);
 
