@@ -249,7 +249,7 @@ function initExp(){
     /* define instructions trial */
     var instructions = {
       type: jsPsychHtmlKeyboardResponse,
-      stimulus: "<p>If the circle is <strong>blue</strong>, you should press the '1' key as quickly as possible.</p><p>If the circle is <strong>orange</strong>, you should <strong>not</strong> press any key.</p><p>Press any key to begin.</p>",
+      stimulus: "<p>If the circle is <strong>blue</strong>, you should press the '1' key as quickly as possible.</p><br><p>If the circle is <strong>orange</strong>, you should <strong>not</strong> press any key.</p><p>Press any key to begin.</p>",
       choices: "ALL_KEYS",
       response_ends_trial: true,
       post_trial_gap: 1000
@@ -291,16 +291,16 @@ response_ends_trial: false,
     task: 'fixation'
   },
   trial_duration: function(){
-					return jsPsych.randomization.sampleWithoutReplacement([500, 750, 1000], 1)[0];
-				}
+	return jsPsych.randomization.sampleWithoutReplacement([500, 750, 1000], 1)[0];
+	}
 };
 var test_block = {
   type: jsPsychHtmlKeyboardResponse,
   stimulus: jsPsych.timelineVariable('stimulus'),
-  choices: [null,'1'],
+  choices: ['1'],
   trial_duration: function(){
-					return jsPsych.randomization.sampleWithoutReplacement([2000, 3000, 4000], 1)[0];
-				},
+	return jsPsych.randomization.sampleWithoutReplacement([2000, 3000, 4000], 1)[0];
+	},
   response_ends_trial: false,
    stimulus_height: 650,
   maintain_aspect_ration: true,
@@ -322,13 +322,16 @@ var test_block = {
     
 var debrief_block = {
   type: jsPsychHtmlKeyboardResponse,
-  stimulus: function() {
+      stimulus: function() {
 
-    var trials = jsPsych.data.get().filter({task: 'response'});
-    var rt = Math.round(trials.select('rt').mean());
+        var trials = jsPsych.data.get().filter({task: 'response'});
+        var correct_trials = trials.filter({correct: true});
+        var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
+        var rt = Math.round(correct_trials.select('rt').mean());
 
-    return '<p>Your average response time was ' + rt + 'ms.</p>' +
-      '<p>Press any key to complete the task. We appreciate your time!</p>';
+        return `<p>You responded correctly on ${accuracy}% of the trials.</p>
+          <p>Your average response time was ${rt}ms.</p>
+          <p>Press any key to complete the experiment. Thank you!</p>`;
 
   }
 };
@@ -361,15 +364,9 @@ timeline.push(debrief_block);
                         return; // Ignore other keys
                     }
                 }
-                // Check if this is a practice trial that requires specific correct answers
-                else if (currentTrial && currentTrial.key_answer) {
-                    if (keyPressed !== currentTrial.key_answer) {
-                        return; // Ignore incorrect keys
-                    }
-                }
                 // Check if this is a response trial that should only accept 1
                 else if (currentTrial && currentTrial.data && currentTrial.data.task === 'test_block') {
-                    if (![null,'1'].includes(keyPressed)) {
+                    if (!['1'].includes(keyPressed)) {
                         return; // Ignore other keys
                     }
                     // For response trials, just record the response but don't advance
