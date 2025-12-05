@@ -124,6 +124,7 @@ Qualtrics.SurveyEngine.addOnload(function()
 				type: jsPsychHtmlKeyboardResponse,
 				stimulus: '<div style="font-size:60px;">+</div>',
 				choices: "NO_KEYS",
+				response_ends_trial: false,
 				trial_duration: function(){
 					return jsPsych.randomization.sampleWithoutReplacement([500, 750, 1000], 1)[0];
 				}
@@ -133,6 +134,7 @@ Qualtrics.SurveyEngine.addOnload(function()
 				type: jsPsychImageKeyboardResponse,
 				stimulus: jsPsych.timelineVariable('stimulus'),
 				choices: "NO_KEYS", // The global listener handles all key presses
+				response_ends_trial: false,
 				trial_duration: function(){
 					return jsPsych.randomization.sampleWithoutReplacement([2000, 3000, 4000], 1)[0];
 				},
