@@ -279,8 +279,8 @@ timeline.push(MRIstart);
 
     /* define test trial stimuli array */
     var test_stimulus = [
-        { stimulus: window.task_github + "img/blue.png", correct_response: '1' },
-        { stimulus: window.task_github + "img/orange.png", correct_response: null },
+        {stimulus: "img/blue.png", data: {response: 'go'}, correct_response: '1'},
+        {stimulus: "img/orange.png", data: {response: 'no-go'}, correct_response: null},
   ];
     var fixation = {
   type: jsPsychHtmlKeyboardResponse,
@@ -305,10 +305,11 @@ var test_block = {
    stimulus_height: 650,
   maintain_aspect_ration: true,
   data: {
-    task: 'response'
+    task: 'response',
+    correct_response: jsPsych.timelineVariable('correct_response')
   },
   on_finish: function(data){
-    data.response;
+        data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
   }
 };
     var test_procedure = {
