@@ -295,7 +295,7 @@ response_ends_trial: false,
 	}
 };
 var test_block = {
-  type: jsPsychHtmlKeyboardResponse,
+  type: jsPsychImageKeyboardResponse,
   stimulus: jsPsych.timelineVariable('stimulus'),
   choices: ['1'],
   trial_duration: function(){
