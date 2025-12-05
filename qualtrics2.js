@@ -302,7 +302,7 @@ var test_block = {
 	return jsPsych.randomization.sampleWithoutReplacement([2000, 3000, 4000], 1)[0];
 	},
   response_ends_trial: false,
-   stimulus_height: 650,
+   stimulus_height: 300,
   maintain_aspect_ration: true,
   data: {
     task: 'response',
