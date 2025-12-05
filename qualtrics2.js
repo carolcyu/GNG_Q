@@ -219,9 +219,9 @@ function initExp(){
             }
             
             /* Saving task data to qualtrics */
-			var STT = jsPsych.data.get().json();
+			var GNG = jsPsych.data.get().json();
 			// save to qualtrics embedded data
-			Qualtrics.SurveyEngine.setEmbeddedData("STT", STT);
+			Qualtrics.SurveyEngine.setEmbeddedData("GNG", GNG);
 			
             // clear the stage
             jQuery('#display_stage').remove();
@@ -279,8 +279,8 @@ timeline.push(MRIstart);
 
     /* define test trial stimuli array */
     var test_stimulus = [
- { stimulus: window.task_github + "img/blue.png", correct_response: '1' },
- { stimulus: window.task_github + "img/orange.png", correct_response: null },
+        { stimulus: window.task_github + "img/blue.png", correct_response: '1' },
+        { stimulus: window.task_github + "img/orange.png", correct_response: null },
   ];
     var fixation = {
   type: jsPsychHtmlKeyboardResponse,
@@ -316,7 +316,6 @@ var test_block = {
       timeline_variables: test_stimulus,
       repetitions: 75,
       randomize_order: false,
-      post_trial_gap: 250,
     };
     timeline.push(test_procedure);
     
@@ -367,9 +366,9 @@ timeline.push(debrief_block);
                         return; // Ignore incorrect keys
                     }
                 }
-                // Check if this is a response trial that should only accept 1-4
-                else if (currentTrial && currentTrial.data && currentTrial.data.task === 'response') {
-                    if (!['1', '2', '3', '4'].includes(keyPressed)) {
+                // Check if this is a response trial that should only accept 1
+                else if (currentTrial && currentTrial.data && currentTrial.data.task === 'test_block') {
+                    if (![null,'1'].includes(keyPressed)) {
                         return; // Ignore other keys
                     }
                     // For response trials, just record the response but don't advance
