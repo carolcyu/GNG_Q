@@ -281,6 +281,14 @@ timeline.push(MRIstart);
     var test_stimulus = [
         {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
         {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
+        {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
+        {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
+                {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
+        {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
+                {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
+                {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
+        {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
+        {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
   ];
     var fixation = {
   type: jsPsychHtmlKeyboardResponse,
@@ -302,7 +310,7 @@ var test_block = {
     return jsPsych.randomization.sampleWithoutReplacement([2000, 3000, 4000], 1)[0];
     },
   response_ends_trial: false,
-   stimulus_height: 650,
+   stimulus_height: 300,
   maintain_aspect_ration: true,
   data: {
     task: 'response',
@@ -315,7 +323,7 @@ var test_block = {
     var test_procedure = {
       timeline: [fixation,test_block],
       timeline_variables: test_stimulus,
-      repetitions: 75,
+      repetitions: 15,
       randomize_order: false,
     };
     timeline.push(test_procedure);
