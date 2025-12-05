@@ -3,11 +3,6 @@ Qualtrics.SurveyEngine.addOnload(function()
     // Retrieve Qualtrics object and save in qthis
     var qthis = this;
 
-    // >> NEW: Force body to be focusable
-    document.body.setAttribute('tabindex', '0');
-    document.body.style.outline = 'none';
-    
-
     // Hide buttons and question content
     qthis.hideNextButton();
     
@@ -31,13 +26,6 @@ Qualtrics.SurveyEngine.addOnload(function()
     displayDiv.style.cssText = 'width: 100%; height: 100vh; padding: 80px 20px 20px 20px; position: relative; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center;';
     displayDiv.innerHTML = '<h3>Loading Experiment...</h3><p>Please wait while we load the task.</p>';
     
-
-    // >> NEW: Ensure displayDiv is focusable immediately
-    displayDiv.setAttribute('tabindex', '0');
-    displayDiv.style.outline = 'none';
-    
-    displayDiv.style.cssText = 'width: 100%; height: 100vh; padding: 80px 20px 20px 20px; position: relative; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center;';
-    // 
     // Insert at the top of the question area
     jQuery('.QuestionOuter').prepend(displayDiv);
     
@@ -159,22 +147,31 @@ Qualtrics.SurveyEngine.addOnload(function()
 
 function initExp(){
     try {
-// Ensure display stage is focused for keyboard input
+        // Check if jsPsych is available
+        if (typeof initJsPsych === 'undefined') {
+            jQuery('#display_stage').html('<p style="color: red;">Error: jsPsych library not loaded</p>');
+            return;
+        }
+        
+        // Ensure display stage is focused for keyboard input
         var displayStage = document.getElementById('display_stage');
         if (displayStage) {
             displayStage.focus();
-            // These lines are now redundant but safe to keep:
-            displayStage.setAttribute('tabindex', '0'); 
+            displayStage.setAttribute('tabindex', '0');
             displayStage.style.outline = 'none';
             displayStage.style.position = 'relative';
             displayStage.style.zIndex = '1000';
             
-            // >> REMOVED CONFLICTING CLICK LISTENER:
-            /*
+            // Make it capture all events
             displayStage.addEventListener('click', function() {
                 this.focus();
             });
-            */
+            
+            // Add keyboard event capture
+            displayStage.addEventListener('keydown', function(event) {
+                console.log('Display stage keydown:', event.key);
+                // Don't prevent default - let jsPsych handle it
+            });
             
             // Force focus after a short delay
             setTimeout(function() {
@@ -245,10 +242,7 @@ function initExp(){
       type: jsPsychHtmlKeyboardResponse,
       stimulus: "<p>Welcome to the Go/No-Go Task.</p><p>In this experiment, different circles will appear in the center of the screen.</p><p>Press any key to continue.</p>",
       choices: "ALL_KEYS",
-      response_ends_trial: true, // <-- Correctly advances after key press
-      data: {
-          task: 'welcome'
-      }
+      response_ends_trial: true
     };
     timeline.push(welcome);
 
@@ -257,21 +251,15 @@ function initExp(){
       type: jsPsychHtmlKeyboardResponse,
       stimulus: "<p>If the circle is <strong>blue</strong>, you should press the '1' key as quickly as possible.</p><br><p>If the circle is <strong>orange</strong>, you should <strong>not</strong> press any key.</p><p>Press any key to begin.</p>",
       choices: "ALL_KEYS",
-      response_ends_trial: true, // <-- Correctly advances after key press
-      post_trial_gap: 1000,
-      data: {
-          task: 'instructions'
-      }
+      response_ends_trial: true,
+      post_trial_gap: 1000
     };
     timeline.push(instructions);
 
 /*questions for the examiner*/
 var questions = {
       type: jsPsychHtmlKeyboardResponse,
-      stimulus: "<p>If you have questions or concerns, please signal to the examiner. </p> <p>If not, press any button to continue. </p>",
-      data: {
-          task: 'questions'
-      }
+      stimulus: "<p>If you have questions or concerns, please signal to the examiner. </p> <p>If not, press any button to continue. </p>"
     };
     timeline.push(questions);
 
@@ -298,7 +286,7 @@ timeline.push(MRIstart);
   type: jsPsychHtmlKeyboardResponse,
   stimulus: '<div style="font-size:60px;">+</div>',
   choices: "NO_KEYS",
-  response_ends_trial: false,
+response_ends_trial: false,
   data: {
     task: 'fixation'
   },
@@ -307,19 +295,17 @@ timeline.push(MRIstart);
     }
 };
 var test_block = {
-  // *** ENSURE THIS IS jsPsychImageKeyboardResponse ***
-  type: jsPsychImageKeyboardResponse, 
+  type: jsPsychImageKeyboardResponse,
   stimulus: jsPsych.timelineVariable('stimulus'),
   choices: ['1'],
   trial_duration: function(){
-    // Trial ends after this duration, regardless of response
     return jsPsych.randomization.sampleWithoutReplacement([2000, 3000, 4000], 1)[0];
     },
-  response_ends_trial: false, // <-- This ensures it runs for the full duration
-   stimulus_height: 300, // Adjusted height for smaller image
+  response_ends_trial: false,
+   stimulus_height: 650,
   maintain_aspect_ration: true,
   data: {
-    task: 'response', // Changed task name to 'response' for clarity in data
+    task: 'response',
     correct_response: jsPsych.timelineVariable('correct_response')
   },
   on_finish: function(data){
@@ -347,9 +333,6 @@ var debrief_block = {
           <p>Your average response time was ${rt}ms.</p>
           <p>Press any key to complete the experiment. Thank you!</p>`;
 
-  },
-  data: {
-      task: 'debrief'
   }
 };
 timeline.push(debrief_block);
@@ -364,7 +347,59 @@ timeline.push(debrief_block);
         }
     }, 1000);
     
-    // *** REMOVED THE AGGRESSIVE CUSTOM KEYBOARD HANDLER ***
+    // Add single, clean keyboard handler
+    setTimeout(function() {
+        // Remove any existing keyboard listeners
+        document.removeEventListener('keydown', arguments.callee);
+        
+        // Add keyboard handler
+        document.addEventListener('keydown', function(event) {
+            if (window.currentJsPsych) {
+                var keyPressed = event.key;
+                var currentTrial = window.currentJsPsych.getCurrentTrial();
+                
+                // Check if this is the MRI start trial that should only accept "5"
+                if (currentTrial && currentTrial.data && currentTrial.data.task === 'mri_start') {
+                    if (keyPressed !== '5') {
+                        return; // Ignore other keys
+                    }
+                }
+                // Check if this is a response trial that should only accept 1
+                else if (currentTrial && currentTrial.data && currentTrial.data.task === 'test_block') {
+                    if (!['1'].includes(keyPressed)) {
+                        return; // Ignore other keys
+                    }
+                    // For response trials, just record the response but don't advance
+                    return;
+                }
+                
+                // Try to advance trial
+                try {
+                    window.currentJsPsych.finishTrial({
+                        response: keyPressed
+                    });
+                } catch (e) {
+                    // Fallback: trigger events on display stage
+                    var displayStage = document.getElementById('display_stage');
+                    if (displayStage) {
+                        var clickEvent = new MouseEvent('click', {
+                            bubbles: true,
+                            cancelable: true
+                        });
+                        displayStage.dispatchEvent(clickEvent);
+                        
+                        var keyEvent = new KeyboardEvent('keydown', {
+                            key: keyPressed,
+                            code: event.code,
+                            bubbles: true,
+                            cancelable: true
+                        });
+                        displayStage.dispatchEvent(keyEvent);
+                    }
+                }
+            }
+        });
+    }, 2000);
     
     } catch (error) {
         if (document.getElementById('display_stage')) {
@@ -378,12 +413,12 @@ timeline.push(debrief_block);
 
 Qualtrics.SurveyEngine.addOnReady(function()
 {
-	/*Place your JavaScript here to run when the page is fully displayed*/
+    /*Place your JavaScript here to run when the page is fully displayed*/
 
 });
 
 Qualtrics.SurveyEngine.addOnUnload(function()
 {
-	/*Place your JavaScript here to run when the page is unloaded*/
+    /*Place your JavaScript here to run when the page is unloaded*/
 
 });
