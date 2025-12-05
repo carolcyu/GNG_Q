@@ -3,6 +3,11 @@ Qualtrics.SurveyEngine.addOnload(function()
     // Retrieve Qualtrics object and save in qthis
     var qthis = this;
 
+    // >> NEW: Force body to be focusable
+    document.body.setAttribute('tabindex', '0');
+    document.body.style.outline = 'none';
+    
+
     // Hide buttons and question content
     qthis.hideNextButton();
     
@@ -26,6 +31,13 @@ Qualtrics.SurveyEngine.addOnload(function()
     displayDiv.style.cssText = 'width: 100%; height: 100vh; padding: 80px 20px 20px 20px; position: relative; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center;';
     displayDiv.innerHTML = '<h3>Loading Experiment...</h3><p>Please wait while we load the task.</p>';
     
+
+    // >> NEW: Ensure displayDiv is focusable immediately
+    displayDiv.setAttribute('tabindex', '0');
+    displayDiv.style.outline = 'none';
+    
+    displayDiv.style.cssText = 'width: 100%; height: 100vh; padding: 80px 20px 20px 20px; position: relative; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center;';
+    // 
     // Insert at the top of the question area
     jQuery('.QuestionOuter').prepend(displayDiv);
     
@@ -147,25 +159,22 @@ Qualtrics.SurveyEngine.addOnload(function()
 
 function initExp(){
     try {
-        // Check if jsPsych is available
-        if (typeof initJsPsych === 'undefined') {
-            jQuery('#display_stage').html('<p style="color: red;">Error: jsPsych library not loaded</p>');
-            return;
-        }
-        
-        // Ensure display stage is focused for keyboard input
+// Ensure display stage is focused for keyboard input
         var displayStage = document.getElementById('display_stage');
         if (displayStage) {
             displayStage.focus();
-            displayStage.setAttribute('tabindex', '0');
+            // These lines are now redundant but safe to keep:
+            displayStage.setAttribute('tabindex', '0'); 
             displayStage.style.outline = 'none';
             displayStage.style.position = 'relative';
             displayStage.style.zIndex = '1000';
             
-            // Make it capture all events
+            // >> REMOVED CONFLICTING CLICK LISTENER:
+            /*
             displayStage.addEventListener('click', function() {
                 this.focus();
             });
+            */
             
             // Force focus after a short delay
             setTimeout(function() {
