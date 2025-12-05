@@ -106,7 +106,7 @@ Qualtrics.SurveyEngine.addOnload(function()
 				stimulus: `
 					<p>Welcome to the Go/No-Go Task.</p>
 					<p>In this experiment, different circles will appear in the center of the screen.</p>
-					<p>If the circle is <strong>blue</strong>, you should press the 'F' key as quickly as possible.</p>
+					<p>If the circle is <strong>blue</strong>, you should press the '1' key as quickly as possible.</p>
 					<p>If the circle is <strong>orange</strong>, you should <strong>not</strong> press any key.</p>
 					<p>Press any key to begin.</p>`
 			};
@@ -116,7 +116,7 @@ Qualtrics.SurveyEngine.addOnload(function()
 			timeline.push(MRIstart);
 
 			var test_stimuli = [
-				{ stimulus: window.task_github + "img/blue.png", correct_response: 'f' },
+				{ stimulus: window.task_github + "img/blue.png", correct_response: '1' },
 				{ stimulus: window.task_github + "img/orange.png", correct_response: null }
 			];
 
@@ -151,8 +151,8 @@ Qualtrics.SurveyEngine.addOnload(function()
 			var test_procedure = {
 				timeline: [fixation, test_block],
 				timeline_variables: test_stimuli,
-				repetitions: 200,
-				randomize_order: true
+				repetitions: 75,
+				randomize_order: false,
 			};
 			timeline.push(test_procedure);
 
