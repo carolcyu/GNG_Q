@@ -62,7 +62,7 @@ Qualtrics.SurveyEngine.addOnload(function()
                 box-sizing: border-box !important;
             }
             #display_stage img {
-                max-width: 65% !important;
+                max-width: 30% !important;
                 max-height: 50vh !important;
                 height: auto !important;
                 display: block !important;
