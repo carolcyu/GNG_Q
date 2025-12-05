@@ -106,11 +106,18 @@ Qualtrics.SurveyEngine.addOnload(function()
 				stimulus: `
 					<p>Welcome to the Go/No-Go Task.</p>
 					<p>In this experiment, different circles will appear in the center of the screen.</p>
+					<p>Press any key to continue.</p>`
+			};
+			timeline.push(instructions);
+			
+			var instructions2 = {
+				type: jsPsychHtmlKeyboardResponse,
+				stimulus: `
 					<p>If the circle is <strong>blue</strong>, you should press the '1' key as quickly as possible.</p>
 					<p>If the circle is <strong>orange</strong>, you should <strong>not</strong> press any key.</p>
 					<p>Press any key to begin.</p>`
 			};
-			timeline.push(instructions);
+			timeline.push(instructions2);
 			
 			var MRIstart = { type: jsPsychHtmlKeyboardResponse, stimulus: "<p> Please wait while the scanner starts up. This will take 10 seconds. </strong></p>", choices: "NO_KEYS", trial_duration: 10000, prompt: "<p> A cross (+) will appear when the task starts. </p>" };
 			timeline.push(MRIstart);
@@ -133,7 +140,7 @@ Qualtrics.SurveyEngine.addOnload(function()
 			var test_block = {
 				type: jsPsychImageKeyboardResponse,
 				stimulus: jsPsych.timelineVariable('stimulus'),
-				choices: "NO_KEYS", // The global listener handles all key presses
+				choices: [null,'1'], // The global listener handles all key presses
 				response_ends_trial: false,
 				trial_duration: function(){
 					return jsPsych.randomization.sampleWithoutReplacement([2000, 3000, 4000], 1)[0];
