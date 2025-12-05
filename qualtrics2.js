@@ -358,6 +358,25 @@ timeline.push(debrief_block);
                 var keyPressed = event.key;
                 var currentTrial = window.currentJsPsych.getCurrentTrial();
                 
+                // Check if we are on a trial that is meant to be advanced by a keyboard press.
+            // This includes welcome, instructions, debrief, or any trial where response_ends_trial is true.
+            var isAdvancingTrial = false;
+            if (currentTrial && currentTrial.data) {
+                // Check task names that are designed to wait for a key to advance
+                var advancing_tasks = ['mri_start', 'welcome', 'instructions', 'questions', 'debrief'];
+                if (advancing_tasks.includes(currentTrial.data.task) || currentTrial.type === 'jsPsychHtmlKeyboardResponse') {
+                    isAdvancingTrial = true;
+                }
+            }
+
+            // If it's a fixation or a response trial, we should NOT manually advance it.
+            // The trial should run for its set duration (trial_duration: 2000/3000/4000ms).
+            if (!isAdvancingTrial) {
+                // If this is a response trial, let jsPsych handle the response recording internally.
+                // We must prevent our custom handler from calling finishTrial.
+                console.log('Key press ignored by custom handler (Test or Fixation trial)');
+                return; 
+            }
                 // Check if this is the MRI start trial that should only accept "5"
                 if (currentTrial && currentTrial.data && currentTrial.data.task === 'mri_start') {
                     if (keyPressed !== '5') {
