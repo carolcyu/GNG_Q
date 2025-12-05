@@ -279,8 +279,8 @@ timeline.push(MRIstart);
 
     /* define test trial stimuli array */
     var test_stimulus = [
-        {stimulus: window.task_github + "img/blue.png", data: {response: 'go'}, correct_response: '1'},
-        {stimulus: window.task_github + "img/orange.png", data: {response: 'no-go'}, correct_response: null},
+        {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
+        {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
   ];
     var fixation = {
   type: jsPsychHtmlKeyboardResponse,
