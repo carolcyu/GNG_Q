@@ -167,12 +167,6 @@ function initExp(){
                 this.focus();
             });
             
-            // Add keyboard event capture
-            displayStage.addEventListener('keydown', function(event) {
-                console.log('Display stage keydown:', event.key);
-                // Don't prevent default - let jsPsych handle it
-            });
-            
             // Force focus after a short delay
             setTimeout(function() {
                 displayStage.focus();
@@ -196,8 +190,8 @@ function initExp(){
         
         /* start the experiment*/
         var jsPsych = initJsPsych({
-		/* Use the Qualtrics-mounted stage as the display element */
-	    display_element: 'display_stage',
+        /* Use the Qualtrics-mounted stage as the display element */
+        display_element: 'display_stage',
         on_trial_start: function() {
             // Ensure focus on each trial
             var displayStage = document.getElementById('display_stage');
@@ -219,10 +213,10 @@ function initExp(){
             }
             
             /* Saving task data to qualtrics */
-			var GNG = jsPsych.data.get().json();
-			// save to qualtrics embedded data
-			Qualtrics.SurveyEngine.setEmbeddedData("GNG", GNG);
-			
+            var GNG = jsPsych.data.get().json();
+            // save to qualtrics embedded data
+            Qualtrics.SurveyEngine.setEmbeddedData("GNG", GNG);
+            
             // clear the stage
             jQuery('#display_stage').remove();
             jQuery('#display_stage_background').remove();
@@ -235,31 +229,40 @@ function initExp(){
       // Store jsPsych reference globally
       window.currentJsPsych = jsPsych;
       
-	      var timeline = [];
+          var timeline = [];
 
     /* define welcome message trial */
     var welcome = {
       type: jsPsychHtmlKeyboardResponse,
-      stimulus: "<p>Welcome to the Go/No-Go Task.</p><p>In this experiment, different circles will appear in the center of the screen.</p><br><p>Press any key to continue.</p>",
+      stimulus: "<p>Welcome to the Go/No-Go Task.</p><p>In this experiment, different circles will appear in the center of the screen.</p><p>Press any key to continue.</p>",
       choices: "ALL_KEYS",
-      response_ends_trial: true
+      response_ends_trial: true, // <-- Correctly advances after key press
+      data: {
+          task: 'welcome'
+      }
     };
     timeline.push(welcome);
 
     /* define instructions trial */
     var instructions = {
       type: jsPsychHtmlKeyboardResponse,
-      stimulus: "<p>If the circle is <strong>blue</strong>, you should press the '1' key as quickly as possible.</p><br><p>If the circle is <strong>orange</strong>, you should <strong>not</strong> press any key.</p><br><p>Press any key to begin.</p>",
+      stimulus: "<p>If the circle is <strong>blue</strong>, you should press the '1' key as quickly as possible.</p><br><p>If the circle is <strong>orange</strong>, you should <strong>not</strong> press any key.</p><p>Press any key to begin.</p>",
       choices: "ALL_KEYS",
-      response_ends_trial: true,
-      post_trial_gap: 1000
+      response_ends_trial: true, // <-- Correctly advances after key press
+      post_trial_gap: 1000,
+      data: {
+          task: 'instructions'
+      }
     };
     timeline.push(instructions);
 
 /*questions for the examiner*/
 var questions = {
       type: jsPsychHtmlKeyboardResponse,
-      stimulus: "<p>If you have questions or concerns, please signal to the examiner. </p><br><p>If not, press any button to continue. </p>"
+      stimulus: "<p>If you have questions or concerns, please signal to the examiner. </p> <p>If not, press any button to continue. </p>",
+      data: {
+          task: 'questions'
+      }
     };
     timeline.push(questions);
 
@@ -286,26 +289,28 @@ timeline.push(MRIstart);
   type: jsPsychHtmlKeyboardResponse,
   stimulus: '<div style="font-size:60px;">+</div>',
   choices: "NO_KEYS",
-response_ends_trial: false,
+  response_ends_trial: false,
   data: {
     task: 'fixation'
   },
   trial_duration: function(){
-	return jsPsych.randomization.sampleWithoutReplacement([500, 750, 1000], 1)[0];
-	}
+    return jsPsych.randomization.sampleWithoutReplacement([500, 750, 1000], 1)[0];
+    }
 };
 var test_block = {
-  type: jsPsychImageKeyboardResponse,
+  // *** ENSURE THIS IS jsPsychImageKeyboardResponse ***
+  type: jsPsychImageKeyboardResponse, 
   stimulus: jsPsych.timelineVariable('stimulus'),
   choices: ['1'],
   trial_duration: function(){
-	return jsPsych.randomization.sampleWithoutReplacement([2000, 3000, 4000], 1)[0];
-	},
-  response_ends_trial: false,
-   stimulus_height: 300,
+    // Trial ends after this duration, regardless of response
+    return jsPsych.randomization.sampleWithoutReplacement([2000, 3000, 4000], 1)[0];
+    },
+  response_ends_trial: false, // <-- This ensures it runs for the full duration
+   stimulus_height: 300, // Adjusted height for smaller image
   maintain_aspect_ration: true,
   data: {
-    task: 'response',
+    task: 'response', // Changed task name to 'response' for clarity in data
     correct_response: jsPsych.timelineVariable('correct_response')
   },
   on_finish: function(data){
@@ -333,6 +338,9 @@ var debrief_block = {
           <p>Your average response time was ${rt}ms.</p>
           <p>Press any key to complete the experiment. Thank you!</p>`;
 
+  },
+  data: {
+      task: 'debrief'
   }
 };
 timeline.push(debrief_block);
@@ -347,78 +355,7 @@ timeline.push(debrief_block);
         }
     }, 1000);
     
-    // Add single, clean keyboard handler
-    setTimeout(function() {
-        // Remove any existing keyboard listeners
-        document.removeEventListener('keydown', arguments.callee);
-        
-        // Add keyboard handler
-        document.addEventListener('keydown', function(event) {
-            if (window.currentJsPsych) {
-                var keyPressed = event.key;
-                var currentTrial = window.currentJsPsych.getCurrentTrial();
-                
-                // Check if we are on a trial that is meant to be advanced by a keyboard press.
-            // This includes welcome, instructions, debrief, or any trial where response_ends_trial is true.
-            var isAdvancingTrial = false;
-            if (currentTrial && currentTrial.data) {
-                // Check task names that are designed to wait for a key to advance
-                var advancing_tasks = ['mri_start', 'welcome', 'instructions', 'questions', 'debrief'];
-                if (advancing_tasks.includes(currentTrial.data.task) || currentTrial.type === 'jsPsychHtmlKeyboardResponse') {
-                    isAdvancingTrial = true;
-                }
-            }
-
-            // If it's a fixation or a response trial, we should NOT manually advance it.
-            // The trial should run for its set duration (trial_duration: 2000/3000/4000ms).
-            if (!isAdvancingTrial) {
-                // If this is a response trial, let jsPsych handle the response recording internally.
-                // We must prevent our custom handler from calling finishTrial.
-                console.log('Key press ignored by custom handler (Test or Fixation trial)');
-                return; 
-            }
-                // Check if this is the MRI start trial that should only accept "5"
-                if (currentTrial && currentTrial.data && currentTrial.data.task === 'mri_start') {
-                    if (keyPressed !== '5') {
-                        return; // Ignore other keys
-                    }
-                }
-                // Check if this is a response trial that should only accept 1
-                else if (currentTrial && currentTrial.data && currentTrial.data.task === 'test_block') {
-                    if (!['1'].includes(keyPressed)) {
-                        return; // Ignore other keys
-                    }
-                    // For response trials, just record the response but don't advance
-                    return;
-                }
-                
-                // Try to advance trial
-                try {
-                    window.currentJsPsych.finishTrial({
-                        response: keyPressed
-                    });
-                } catch (e) {
-                    // Fallback: trigger events on display stage
-                    var displayStage = document.getElementById('display_stage');
-                    if (displayStage) {
-                        var clickEvent = new MouseEvent('click', {
-                            bubbles: true,
-                            cancelable: true
-                        });
-                        displayStage.dispatchEvent(clickEvent);
-                        
-                        var keyEvent = new KeyboardEvent('keydown', {
-                            key: keyPressed,
-                            code: event.code,
-                            bubbles: true,
-                            cancelable: true
-                        });
-                        displayStage.dispatchEvent(keyEvent);
-                    }
-                }
-            }
-        });
-    }, 2000);
+    // *** REMOVED THE AGGRESSIVE CUSTOM KEYBOARD HANDLER ***
     
     } catch (error) {
         if (document.getElementById('display_stage')) {
