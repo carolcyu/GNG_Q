@@ -372,6 +372,11 @@ timeline.push(debrief_block);
                         return; // Ignore other keys
                     }
                 }
+				if (currentTrial && currentTrial.data && currentTrial.data.task === 'fixation') {
+                // If it is a fixation trial, IGNORE ALL key presses and DO NOT advance the trial.
+                console.log('Key ignored during fixation.');
+                return; 
+            }
                 // Check if this is a practice trial that requires specific correct answers
                 else if (currentTrial && currentTrial.key_answer) {
                     if (keyPressed !== currentTrial.key_answer) {
