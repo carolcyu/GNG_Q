@@ -304,9 +304,9 @@ response_ends_trial: false,
 var test_block = {
   type: jsPsychImageKeyboardResponse,
   stimulus: jsPsych.timelineVariable('stimulus'),
-  choices: ['1']",
+  choices: ['1'],
   trial_duration: function(){
-    return jsPsych.randomization.sampleWithoutReplacement([2000, 3000, 4000], 1)[0];
+    return jsPsych.randomization.sampleWithoutReplacement([2000, 2500, 3000, 3500], 1)[0];
     },
   response_ends_trial: false,
    stimulus_height: 300,
@@ -378,9 +378,9 @@ timeline.push(debrief_block);
                         return; // Ignore incorrect keys
                     }
                 }
-                // Check if this is a response trial that should only accept 1-4
+                // Check if this is a response trial that should only accept 1 or null
                 else if (currentTrial && currentTrial.data && currentTrial.data.task === 'response') {
-                    if (!['1', '2', '3', '4'].includes(keyPressed)) {
+                    if (!['1'].includes(keyPressed)) {
                         return; // Ignore other keys
                     }
                     // For response trials, just record the response but don't advance
