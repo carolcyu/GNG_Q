@@ -1,8 +1,7 @@
 Qualtrics.SurveyEngine.addOnload(function()
 {
-    // ================================================================= //
-    //                      SETUP AND INITIALIZATION                     //
-    // ================================================================= //
+    // ... (Setup and Initialization code remains the same) ...
+
     var qthis = this;
     qthis.hideNextButton();
 
@@ -90,21 +89,25 @@ Qualtrics.SurveyEngine.addOnload(function()
                 window.qualtricsKeyboardListener = function(event) {
                     var keyPressed = event.key;
                     
-                    // Safely get the data for the currently active trial
+                    // Safely check if a trial is running and get its data
                     var currentTrialData = jsPsych.data.get().last().values()[0];
                     
                     // CRITICAL CHECK: Only record if a response hasn't already been recorded (RT is null)
                     if (currentTrialData && currentTrialData.rt === null) {
                         try {
-                            // Calculate RT: Current time - trial start time (approximated from jsPsych's time_elapsed)
-                            var trialStartTime = currentTrialData.time_elapsed - currentTrialData.internal_node_id.split('-').slice(-1)[0] * 1000;
+                            // 1. Get accurate trial start time from jsPsych API
+                            var trialStartTime = jsPsych.pluginAPI.getLastTrialStartTime();
+                            // 2. Calculate RT
                             var rt = Date.now() - trialStartTime;
                             
-                            // *** FIX: Add response/RT to the current trial data without calling jsPsych.finishTrial() ***
-                            jsPsych.data.get().last().addToLast({
+                            // 3. *** FIX: Add response/RT to the current trial data using the official function ***
+                            // This records the data without ending the trial.
+                            jsPsych.data.addDataToLastTrial({
                                 response: keyPressed,
                                 rt: rt
                             });
+                            console.log("Response recorded:", keyPressed, "RT:", rt);
+
                         } catch (e) {
                             // This will catch attempts to press a key during a non-response trial (like fixation)
                             console.warn("Key press " + keyPressed + " ignored on current trial (could not record data).");
@@ -194,7 +197,7 @@ Qualtrics.SurveyEngine.addOnload(function()
             var debrief_block = {
                 type: jsPsychHtmlKeyboardResponse,
                 stimulus: function() {
-                    // This logic still correctly filters for trials with a correct flag set by on_finish
+                    // This logic still correctly calculates accuracy and RT from the recorded data
                     var trials = jsPsych.data.get().filter({task: 'response'});
                     var correct_trials = trials.filter({correct: true});
                     
