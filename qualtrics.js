@@ -1,222 +1,438 @@
 Qualtrics.SurveyEngine.addOnload(function()
 {
-    // ================================================================= //
-    //                      SETUP AND INITIALIZATION                     //
-    // ================================================================= //
-    var qthis = this;
-    qthis.hideNextButton();
+    // Retrieve Qualtrics object and save in qthis
+	var qthis = this;
+	qthis.hideNextButton();
 
-    // Make the question container full screen
+ // Hide the question text and make the container full screen
     jQuery('.QuestionText, .QuestionBody').hide();
     jQuery('.QuestionOuter').css({
-        'position': 'fixed', 'top': '0', 'left': '0', 'width': '100%',
-        'height': '100vh', 'z-index': '9999', 'background': 'black',
-        'margin': '0', 'padding': '0'
+        'position': 'fixed',
+        'top': '0',
+        'left': '0',
+        'width': '100%',
+        'height': '100vh',
+        'z-index': '9999',
+        'background': 'black',
+        'margin': '0',
+        'padding': '0'
     });
 
-    // Create the display stage for the experiment
+	// Create display elements
     var displayDiv = document.createElement('div');
     displayDiv.id = 'display_stage';
+    displayDiv.style.cssText = 'width: 100%; height: 100vh; padding: 80px 20px 20px 20px; position: relative; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center;';
+    displayDiv.innerHTML = '<h3>Loading Experiment...</h3><p>Please wait while we load the task.</p>';
+    
+	 // Insert at the top of the question area
     jQuery('.QuestionOuter').prepend(displayDiv);
-
-    // =========================================================== //
-    //          ** FORCEFUL STYLE INJECTION (THE FIX) ** //
-    // =========================================================== //
-    var css = `
-        #display_stage {
-            background-color: black !important;
-            color: white !important;
-            height: 100vh !important;
-            width: 100% !important;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        #display_stage p, #display_stage div, #display_stage strong {
-            color: white !important;
-        }
-    `;
-    var styleSheet = document.createElement("style");
-    styleSheet.type = "text/css";
-    styleSheet.innerText = css;
-    document.head.appendChild(styleSheet);
-
-    // GitHub repository path for GNG
+    
+    // Define task_github globally
     window.task_github = "https://carolcyu.github.io/GNG_Q/";
-
-    // Load necessary jsPsych scripts
-    var scripts = [
-        "https://carolcyu.github.io/GNG_Q/jspsych/jspsych.js",
-        "https://carolcyu.github.io/GNG_Q/jspsych/plugin-image-keyboard-response.js",
-        "https://carolcyu.github.io/GNG_Q/jspsych/plugin-html-keyboard-response.js",
-        "https://carolcyu.github.io/GNG_Q/jspsych/plugin-html-button-response.js"
-    ];
-
-    var loaded_scripts = 0;
-    function loadScript() {
-        if (loaded_scripts < scripts.length) {
-            jQuery.getScript(scripts[loaded_scripts], function() {
-                loaded_scripts++;
-                loadScript();
-            });
-        } else {
-            initExp();
+    
+    // Load the experiment
+    if (typeof jQuery !== 'undefined') {
+        loadExperiment();
+    }
+    
+    function loadExperiment() {
+        // Update display
+        jQuery('#display_stage').html('<h3>Loading Experiment...</h3><p>Please wait while we load the task.</p>');
+        
+        // Load CSS first with error handling
+        jQuery("<link rel='stylesheet' href='" + window.task_github + "jspsych/jspsych.css'>").appendTo('head');
+        jQuery("<link rel='stylesheet' href='" + window.task_github + "jspsych/my_experiment_style_GNG.css'>").appendTo('head');
+        
+        // Add inline CSS as backup
+        jQuery("<style>").text(`
+            #display_stage {
+                background-color: black !important;
+                height: 100vh !important;
+                padding: 50px 20px 20px 20px !important;
+                width: 100% !important;
+                position: relative !important;
+                z-index: 1000 !important;
+                overflow: hidden;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: center !important;
+                align-items: center !important;
+                box-sizing: border-box !important;
+            }
+            #display_stage img {
+                max-width: 65% !important;
+                max-height: 50vh !important;
+                height: auto !important;
+                display: block !important;
+                margin: 10px auto !important;
+                object-fit: contain !important;
+            }
+            .jspsych-content {
+                background-color: black !important;
+                padding: 20px !important;
+                border-radius: 5px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                width: 100% !important;
+                height: 100vh !important;
+                overflow: hidden;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: center !important;
+                align-items: center !important;
+                box-sizing: border-box !important;
+            }
+            .jspsych-display-element {
+                background-color: black !important;
+                width: 100% !important;
+                height: 100vh !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: center !important;
+                align-items: center !important;
+            }
+            .jspsych-stimulus {
+                max-width: 100% !important;
+                max-height: 60vh !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: flex-start !important;
+                align-items: center !important;
+            }
+            .QuestionOuter {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 100vh !important;
+                z-index: 9999 !important;
+                background: black !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            body {
+                overflow: hidden !important;
+            }
+        `).appendTo('head');
+        
+        // Scripts to load
+        var scripts = [
+            window.task_github + "jspsych/jspsych.js",
+            window.task_github + "jspsych/plugin-image-keyboard-response.js",
+            window.task_github + "jspsych/plugin-html-button-response.js", 
+            window.task_github + "jspsych/plugin-html-keyboard-response.js", 
+            window.task_github + "jspsych/plugin-categorize-html.js"
+        ];
+        
+        loadScripts(0);
+        
+        function loadScripts(index) {
+            if (index >= scripts.length) {
+                // All scripts loaded, start experiment
+                setTimeout(initExp, 500);
+                return;
+            }
+            
+            jQuery.getScript(scripts[index])
+                .done(function() {
+                    loadScripts(index + 1);
+                })
+                .fail(function() {
+                    jQuery('#display_stage').html('<p style="color: red;">Failed to load experiment scripts. Please refresh the page.</p>');
+                });
         }
     }
-    loadScript();
 
-    // ================================================================= //
-    //                          EXPERIMENT LOGIC                         //
-    // ================================================================= //
-    function initExp(){
-        try {
-            var jsPsych = initJsPsych({
-                display_element: 'display_stage',
-                on_finish: function() {
-                    document.removeEventListener('keydown', window.qualtricsKeyboardListener);
-                    var gng_data = jsPsych.data.get().json();
-                    // Save data to Qualtrics Embedded Data field "GNG_Q"
-                    Qualtrics.SurveyEngine.setEmbeddedData("GNG_Q", gng_data);
-                    jQuery('#display_stage').remove();
-                    qthis.clickNextButton();
-                }
+
+function initExp(){
+    try {
+        // Check if jsPsych is available
+        if (typeof initJsPsych === 'undefined') {
+            jQuery('#display_stage').html('<p style="color: red;">Error: jsPsych library not loaded</p>');
+            return;
+        }
+        
+        // Ensure display stage is focused for keyboard input
+        var displayStage = document.getElementById('display_stage');
+        if (displayStage) {
+            displayStage.focus();
+            displayStage.setAttribute('tabindex', '0');
+            displayStage.style.outline = 'none';
+            displayStage.style.position = 'relative';
+            displayStage.style.zIndex = '1000';
+            
+            // Make it capture all events
+            displayStage.addEventListener('click', function() {
+                this.focus();
             });
-
-            // =====================================================================
-            // ==      CRITICAL FIX: Manual Update with Direct Time Access      ==
-            // =====================================================================
+            
+            // Add keyboard event capture
+            displayStage.addEventListener('keydown', function(event) {
+                console.log('Display stage keydown:', event.key);
+                // Don't prevent default - let jsPsych handle it
+            });
+            
+            // Force focus after a short delay
             setTimeout(function() {
-                window.qualtricsKeyboardListener = function(event) {
-                    var keyPressed = event.key;
-                    
-                    // 1. Get the current trial's data object.
-                    var currentTrialData = jsPsych.data.get().last().values()[0];
-                    
-                    // CRITICAL CHECK: Only proceed if a trial is active and a response hasn't been recorded.
-                    if (currentTrialData && currentTrialData.rt === null) {
-                        try {
-                            // 2. Retrieve the high-resolution start time recorded in on_start.
-                            var trialStartTime = currentTrialData.time_start; 
-                            
-                            if (!trialStartTime) {
-                                console.warn("Trial start time missing. Response ignored.");
-                                return; 
-                            }
+                displayStage.focus();
+                // Also try focusing the document body
+                document.body.focus();
+            }, 100);
+        }
+        
+        jQuery('#display_stage').html('<h3>Experiment Starting...</h3><p>Focusing display for keyboard input...</p>');
+        
+        // Add focus management
+        var focusInterval = setInterval(function() {
+            var displayStage = document.getElementById('display_stage');
+            if (displayStage) {
+                displayStage.focus();
+            }
+        }, 1000);
+        
+        // Store reference to jsPsych for later use
+        window.currentJsPsych = null;
+        
+        /* start the experiment*/
+        var jsPsych = initJsPsych({
+		/* Use the Qualtrics-mounted stage as the display element */
+	    display_element: 'display_stage',
+        on_trial_start: function() {
+            // Ensure focus on each trial
+            var displayStage = document.getElementById('display_stage');
+            if (displayStage) {
+                displayStage.focus();
+            }
+        },
+        on_trial_finish: function() {
+            // Ensure focus after each trial
+            var displayStage = document.getElementById('display_stage');
+            if (displayStage) {
+                displayStage.focus();
+            }
+        },
+        on_finish: function() {
+            // Clear the focus interval
+            if (typeof focusInterval !== 'undefined') {
+                clearInterval(focusInterval);
+            }
+            
+            /* Saving task data to qualtrics */
+			var GNG = jsPsych.data.get().json();
+			// save to qualtrics embedded data
+			Qualtrics.SurveyEngine.setEmbeddedData("GNG", GNG);
+			
+            // clear the stage
+            jQuery('#display_stage').remove();
+            jQuery('#display_stage_background').remove();
 
-                            // 3. Calculate RT manually using high-resolution time.
-                            var rt = performance.now() - trialStartTime;
-                            
-                            // 4. Manually assign the recorded response and RT to the current data object.
-                            jsPsych.data.get().last().values()[0].response = keyPressed;
-                            jsPsych.data.get().last().values()[0].rt = rt;
-                            
-                            console.log("Response recorded:", keyPressed, "RT:", rt);
+            // simulate click on Qualtrics "next" button, making use of the Qualtrics JS API
+            qthis.clickNextButton();
+        }
+      }); 
+      
+      // Store jsPsych reference globally
+      window.currentJsPsych = jsPsych;
 
-                        } catch (e) {
-                            console.warn("Key press " + keyPressed + " ignored due to error: " + e);
-                        }
-                    } else if (currentTrialData) {
-                        console.warn("Key press " + keyPressed + " ignored (response already recorded).");
+			// --- GNG TASK TIMELINE DEFINITION ---
+			 var timeline = [];
+
+    /* define welcome message trial */
+    var welcome = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: "<p>Welcome to the Go/No-Go Task.</p><p>In this experiment, different circles will appear in the center of the screen.</p><p>Press any key to continue.</p>",
+      choices: "ALL_KEYS",
+      response_ends_trial: true
+    };
+    timeline.push(welcome);
+
+    /* define instructions trial */
+    var instructions = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: "<p>If the circle is <strong>blue</strong>, you should press the '1' key as quickly as possible.</p><br><p>If the circle is <strong>orange</strong>, you should <strong>not</strong> press any key.</p><p>Press any key to begin.</p>",
+      choices: "ALL_KEYS",
+      response_ends_trial: true,
+      post_trial_gap: 1000
+    };
+    timeline.push(instructions);
+
+/*questions for the examiner*/
+var questions = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: "<p>If you have questions or concerns, please signal to the examiner. </p> <p>If not, press any button to continue. </p>"
+    };
+    timeline.push(questions);
+
+/*define trial awaiting for the scanner keyboard button #5 */
+var MRIstart ={
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: "<p> Please wait while the scanner starts up. This will take 10 seconds. </strong></p>",
+  choices: ['5'],
+ prompt: "<p> A cross (+) will appear when the task starts. </p>",
+ data: {
+    task: 'mri_start'},
+    on_finish: function(data){
+    data.response;
+ }
+};
+timeline.push(MRIstart);
+
+    /* define test trial stimuli array */
+    var test_stimulus = [
+        {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
+        {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
+        {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
+        {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
+                {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
+        {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
+                {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
+                {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
+        {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
+        {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
+  ];
+    var fixation = {
+  type: jsPsychHtmlKeyboardResponse,
+  stimulus: '<div style="font-size:60px;">+</div>',
+  choices: "NO_KEYS",
+response_ends_trial: false,
+  data: {
+    task: 'fixation'
+  },
+  trial_duration: function(){
+    return jsPsych.randomization.sampleWithoutReplacement([500, 750, 1000], 1)[0];
+    }
+};
+var test_block = {
+  type: jsPsychImageKeyboardResponse,
+  stimulus: jsPsych.timelineVariable('stimulus'),
+  choices: ['1']",
+  trial_duration: function(){
+    return jsPsych.randomization.sampleWithoutReplacement([2000, 3000, 4000], 1)[0];
+    },
+  response_ends_trial: false,
+   stimulus_height: 300,
+  maintain_aspect_ration: true,
+  data: {
+    task: 'response',
+    correct_response: jsPsych.timelineVariable('correct_response')
+  },
+  on_finish: function(data){
+        data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
+  }
+};
+    var test_procedure = {
+      timeline: [fixation,test_block],
+      timeline_variables: test_stimulus,
+      repetitions: 15,
+      randomize_order: false,
+    };
+    timeline.push(test_procedure);
+    
+var debrief_block = {
+  type: jsPsychHtmlKeyboardResponse,
+      stimulus: function() {
+
+        var trials = jsPsych.data.get().filter({task: 'response'});
+        var correct_trials = trials.filter({correct: true});
+        var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
+        var rt = Math.round(correct_trials.select('rt').mean());
+
+        return `<p>You responded correctly on ${accuracy}% of the trials.</p>
+          <p>Your average response time was ${rt}ms.</p>
+          <p>Press any key to complete the experiment. Thank you!</p>`;
+
+  }
+};
+timeline.push(debrief_block);
+    /* start the experiment */
+    jsPsych.run(timeline);
+    
+    
+    // Ensure focus after experiment starts
+    setTimeout(function() {
+        var displayStage = document.getElementById('display_stage');
+        if (displayStage) {
+            displayStage.focus();
+        }
+    }, 1000);
+    
+    // Add single, clean keyboard handler
+    setTimeout(function() {
+        // Remove any existing keyboard listeners
+        document.removeEventListener('keydown', arguments.callee);
+        
+        // Add keyboard handler
+        document.addEventListener('keydown', function(event) {
+            if (window.currentJsPsych) {
+                var keyPressed = event.key;
+                var currentTrial = window.currentJsPsych.getCurrentTrial();
+                
+                // Check if this is the MRI start trial that should only accept "5"
+                if (currentTrial && currentTrial.data && currentTrial.data.task === 'mri_start') {
+                    if (keyPressed !== '5') {
+                        return; // Ignore other keys
                     }
-                };
-                document.addEventListener('keydown', window.qualtricsKeyboardListener);
-            }, 1500);
-
-
-            // --- GNG TASK TIMELINE DEFINITION ---
-            var timeline = [];
-
-            var instructions = {
-                type: jsPsychHtmlKeyboardResponse,
-                stimulus: `
-                    <p>Welcome to the Go/No-Go Task.</p>
-                    <p>In this experiment, different circles will appear in the center of the screen.</p>
-                    <p>Press any key to continue.</p>`
-            };
-            timeline.push(instructions);
-            
-            var instructions2 = {
-                type: jsPsychHtmlKeyboardResponse,
-                stimulus: `
-                    <p>If the circle is <strong>blue</strong>, you should press the '1' key as quickly as possible.</p>
-                    <p>If the circle is <strong>orange</strong>, you should <strong>not</strong> press any key.</p>
-                    <p>Press any key to begin.</p>`
-            };
-            timeline.push(instructions2);
-            
-            var MRIstart = { type: jsPsychHtmlKeyboardResponse, stimulus: "<p> Please wait while the scanner starts up. This will take 10 seconds. </strong></p>", choices: "NO_KEYS", trial_duration: 10000, prompt: "<p> A cross (+) will appear when the task starts. </p>" };
-            timeline.push(MRIstart);
-
-            var test_stimuli = [
-                { stimulus: window.task_github + "img/blue.png", correct_response: '1' },
-                { stimulus: window.task_github + "img/orange.png", correct_response: null }
-            ];
-
-            var fixation = {
-                type: jsPsychHtmlKeyboardResponse,
-                stimulus: '<div style="font-size:60px;">+</div>',
-                choices: "NO_KEYS",
-                response_ends_trial: false,
-                trial_duration: function(){
-                    return jsPsych.randomization.sampleWithoutReplacement([500, 750, 1000], 1)[0];
                 }
-            };
-
-            var test_block = {
-                type: jsPsychImageKeyboardResponse,
-                stimulus: jsPsych.timelineVariable('stimulus'),
-                // Fixed timing: NO_KEYS prevents the plugin from terminating the trial early
-                choices: "NO_KEYS", 
-                response_ends_trial: false,
-                trial_duration: function(){
-                    return jsPsych.randomization.sampleWithoutReplacement([2000, 3000, 4000], 1)[0];
-                },
-                data: {
-                    task: 'response',
-                    correct_response: jsPsych.timelineVariable('correct_response'),
-                    response: null, 
-                    rt: null
-                },
-                // *** CRITICAL ADDITION: Record high-resolution start time when the trial begins ***
-                on_start: function(trial) {
-                    // Record the time the trial was added to the data pipeline
-                    jsPsych.data.get().last().values()[0].time_start = performance.now();
-                },
-                on_finish: function(data){
-                    // This logic uses the 'response' and 'rt' recorded by the manual listener for scoring.
-                    var response = data.response ? data.response.toLowerCase() : null;
-                    data.correct = jsPsych.pluginAPI.compareKeys(response, data.correct_response);
+                // Check if this is a practice trial that requires specific correct answers
+                else if (currentTrial && currentTrial.key_answer) {
+                    if (keyPressed !== currentTrial.key_answer) {
+                        return; // Ignore incorrect keys
+                    }
                 }
-            };
-
-            var test_procedure = {
-                timeline: [fixation, test_block],
-                timeline_variables: test_stimuli,
-                repetitions: 75,
-                randomize_order: false,
-            };
-            timeline.push(test_procedure);
-
-            var debrief_block = {
-                type: jsPsychHtmlKeyboardResponse,
-                stimulus: function() {
-                    var trials = jsPsych.data.get().filter({task: 'response'});
-                    var correct_trials = trials.filter({correct: true});
-                    
-                    var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
-                    var rt = Math.round(correct_trials.select('rt').mean());
-                    
-                    return `<p>You responded correctly on ${accuracy}% of the trials.</p><p>Your average response time for correct trials was ${rt}ms.</p><p>Press any key to complete the experiment.</p>`;
+                // Check if this is a response trial that should only accept 1-4
+                else if (currentTrial && currentTrial.data && currentTrial.data.task === 'response') {
+                    if (!['1', '2', '3', '4'].includes(keyPressed)) {
+                        return; // Ignore other keys
+                    }
+                    // For response trials, just record the response but don't advance
+                    return;
                 }
-            };
-            timeline.push(debrief_block);
-
-            jsPsych.run(timeline);
-
-        } catch (error) {
-            console.error(error);
-            jQuery('#display_stage').html('<p style="color: red;">A critical error occurred. Please contact the study administrator.</p>');
+                
+                // Try to advance trial
+                try {
+                    window.currentJsPsych.finishTrial({
+                        response: keyPressed
+                    });
+                } catch (e) {
+                    // Fallback: trigger events on display stage
+                    var displayStage = document.getElementById('display_stage');
+                    if (displayStage) {
+                        var clickEvent = new MouseEvent('click', {
+                            bubbles: true,
+                            cancelable: true
+                        });
+                        displayStage.dispatchEvent(clickEvent);
+                        
+                        var keyEvent = new KeyboardEvent('keydown', {
+                            key: keyPressed,
+                            code: event.code,
+                            bubbles: true,
+                            cancelable: true
+                        });
+                        displayStage.dispatchEvent(keyEvent);
+                    }
+                }
+            }
+        });
+    }, 2000);
+    
+    } catch (error) {
+        if (document.getElementById('display_stage')) {
+            document.getElementById('display_stage').innerHTML = '<p style="color: red;">Error initializing experiment. Please refresh the page.</p>';
         }
     }
+}
+
+// Close the addOnload function
+});
+
+Qualtrics.SurveyEngine.addOnReady(function()
+{
+	/*Place your JavaScript here to run when the page is fully displayed*/
+
+});
+
+Qualtrics.SurveyEngine.addOnUnload(function()
+{
+	/*Place your JavaScript here to run when the page is unloaded*/
+
 });
