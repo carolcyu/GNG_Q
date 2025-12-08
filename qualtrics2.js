@@ -305,7 +305,7 @@ response_ends_trial: false,
 var test_block = {
   type: jsPsychImageKeyboardResponse,
   stimulus: jsPsych.timelineVariable('stimulus'),
-  choices: ['1'],
+  choices: "NO_KEYS", // The global listener handles all key presses so I don't need to specify responses as null and 1
   trial_duration: function(){
     return jsPsych.randomization.sampleWithoutReplacement([2000, 3000, 4000], 1)[0];
     },
