@@ -140,7 +140,7 @@ Qualtrics.SurveyEngine.addOnload(function()
 			var test_block = {
 				type: jsPsychImageKeyboardResponse,
 				stimulus: jsPsych.timelineVariable('stimulus'),
-				choices: [null,'1'], // The global listener handles all key presses
+				choices: "NO_KEYS", // The global listener handles all key presses so I don't need to specify responses as null and 1
 				response_ends_trial: false,
 				trial_duration: function(){
 					return jsPsych.randomization.sampleWithoutReplacement([2000, 3000, 4000], 1)[0];
