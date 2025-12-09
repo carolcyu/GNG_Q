@@ -322,7 +322,7 @@ var test_block = {
     var test_procedure = {
       timeline: [fixation,test_block],
       timeline_variables: test_stimulus,
-      repetitions: 15,
+      repetitions: 7,
       randomize_order: false,
     };
     timeline.push(test_procedure);
