@@ -317,7 +317,14 @@ var test_block = {
     correct_response: jsPsych.timelineVariable('correct_response')
   },
   on_finish: function(data){
-        data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
+       // Explicitly handle Go vs No-Go logic
+        if (data.correct_response !== null) {
+            // GO Trial: Correct if the key pressed matches the correct response
+            data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
+        } else {
+            // NO-GO Trial: Correct if NO key was pressed (response is null)
+            data.correct = (data.response === null);
+        }
   }
 };
     var test_procedure = {
