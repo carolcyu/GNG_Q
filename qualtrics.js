@@ -282,12 +282,13 @@ timeline.push(MRIstart);
         {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
         {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
         {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
-                {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
+         {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
         {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
-                {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
-                {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
+         {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
         {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
-        {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
+         {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
+         {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
+
   ];
     var fixation = {
   type: jsPsychHtmlKeyboardResponse,
