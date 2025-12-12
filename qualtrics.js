@@ -286,8 +286,14 @@ timeline.push(MRIstart);
         {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
          {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
         {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
+                 {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
+                          {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
          {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
          {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
+                  {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
+                           {stimulus: 'https://carolcyu.github.io/GNG_Q/img/blue.png', data: {response: 'go'}, correct_response: '1'},
+                                    {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
+                                    {stimulus: 'https://carolcyu.github.io/GNG_Q/img/orange.png', data: {response: 'no-go'}, correct_response: null},
 
   ];
     var fixation = {
@@ -330,7 +336,7 @@ var test_block = {
     var test_procedure = {
       timeline: [fixation,test_block],
       timeline_variables: test_stimulus,
-      repetitions: 7,
+      repetitions: 5,
       randomize_order: false,
     };
     timeline.push(test_procedure);
@@ -342,10 +348,8 @@ var debrief_block = {
         var trials = jsPsych.data.get().filter({task: 'response'});
         var correct_trials = trials.filter({correct: true});
         var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
-        var rt = Math.round(correct_trials.select('rt').mean());
 
         return `<p>You responded correctly on ${accuracy}% of the trials.</p>
-          <p>Your average response time was ${rt}ms.</p>
           <p>Press any key to complete the experiment. Thank you!</p>`;
 
   }
