@@ -317,26 +317,28 @@ var test_block = {
     },
   response_ends_trial: false,
    stimulus_height: 300,
-  maintain_aspect_ration: true,
+  maintain_aspect_ratio: true,
   data: {
     task: 'response',
     correct_response: jsPsych.timelineVariable('correct_response')
   },
-  on_finish: function(data){
-       // Explicitly handle Go vs No-Go logic
-        if (data.correct_response !== null) {
-            // GO Trial: Correct if the key pressed matches the correct response
-            data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
-        } else {
-            // NO-GO Trial: Correct if NO key was pressed (response is null)
-            data.correct = (data.response === null);
-        }
+on_finish: function(data){
+    // 1. Check if it is a GO trial (correct_response is '1')
+    if (data.correct_response !== null) {
+      // It is correct if the key pressed matches the correct response
+      data.correct = jsPsych.pluginAPI.compareKeys(data.response, data.correct_response);
+    } 
+    // 2. Otherwise, it is a NO-GO trial (correct_response is null)
+    else {
+      // It is correct ONLY if no key was pressed (response is null)
+      data.correct = (data.response === null);
+    }
   }
 };
     var test_procedure = {
       timeline: [fixation,test_block],
       timeline_variables: test_stimulus,
-      repetitions: 5,
+      repetitions: 1,
       randomize_order: false,
     };
     timeline.push(test_procedure);
