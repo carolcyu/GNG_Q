@@ -338,22 +338,29 @@ on_finish: function(data){
     var test_procedure = {
       timeline: [fixation,test_block],
       timeline_variables: test_stimulus,
-      repetitions: 1,
+      repetitions: 5,
       randomize_order: false,
     };
     timeline.push(test_procedure);
     
 var debrief_block = {
   type: jsPsychHtmlKeyboardResponse,
-      stimulus: function() {
+  stimulus: function() {
+    // Get all trials labeled 'response'
+    var trials = jsPsych.data.get().filter({task: 'response'});
+    
+    // Get only the correct ones
+    var correct_trials = trials.filter({correct: true});
+    
+    // Calculate accuracy
+    // We add "|| 0" to accuracy just in case the trial count is 0, to prevent NaN errors
+    var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
+    
+    // Debugging line: Check your console (F12) to verify the numbers!
+    console.log("Total: " + trials.count() + ", Correct: " + correct_trials.count());
 
-        var trials = jsPsych.data.get().filter({task: 'response'});
-        var correct_trials = trials.filter({correct: true});
-        var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
-
-        return `<p>You responded correctly on ${accuracy}% of the trials.</p>
-          <p>Press any key to complete the experiment. Thank you!</p>`;
-
+    return `<p>You responded correctly on <strong>${accuracy}%</strong> of the trials.</p>
+            <p>Press any key to complete the experiment. Thank you!</p>`;
   }
 };
 timeline.push(debrief_block);
