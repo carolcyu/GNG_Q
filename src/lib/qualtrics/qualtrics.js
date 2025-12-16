@@ -232,6 +232,19 @@ function initExp(){
                     no_go_trials: responseTrials.filter({correct_response: null}).count()
                 });
                 
+                // Add timing sequence configuration to data for MRI alignment reference
+                var timingConfig = {
+                    fixation_sequence: fixation_sequence_qualtrics,
+                    stimulus_sequence: stimulus_sequence_qualtrics,
+                    version: 'qualtrics',
+                    total_trials: 80
+                };
+                jsPsych.data.addProperties({
+                    timing_config: timingConfig
+                });
+                
+                console.log('[GNG-Qualtrics] Timing configuration saved:', timingConfig);
+                
                 /* Saving task data to qualtrics */
                 var GNG = jsPsych.data.get().json();
                 console.log('[GNG-Qualtrics] Saving data to Qualtrics embedded data field "GNG"');
@@ -326,6 +339,37 @@ function initExp(){
         go_count: test_stimulus.filter(function(s) { return s.data.response === 'go'; }).length,
         no_go_count: test_stimulus.filter(function(s) { return s.data.response === 'no-go'; }).length
     });
+    
+    /* Fixed timing sequences for MRI alignment (same for all participants) */
+    // Qualtrics version: 80 trials (5 reps × 16 stimuli)
+    // Fixation durations: 500, 750, 1000ms
+    // Pattern repeats to cover 80 trials (500, 750, 1000 repeating)
+    var fixation_sequence_qualtrics = [
+        500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500,
+        750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750,
+        1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000,
+        500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500,
+        750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750
+    ];
+    
+    // Stimulus durations: 2000, 2500, 3000, 3500ms
+    // Pattern repeats to cover 80 trials
+    var stimulus_sequence_qualtrics = [
+        2000, 2500, 3000, 3500, 2000, 2500, 3000, 3500,
+        2000, 2500, 3000, 3500, 2000, 2500, 3000, 3500,
+        2000, 2500, 3000, 3500, 2000, 2500, 3000, 3500,
+        2000, 2500, 3000, 3500, 2000, 2500, 3000, 3500,
+        2000, 2500, 3000, 3500, 2000, 2500, 3000, 3500,
+        2000, 2500, 3000, 3500, 2000, 2500, 3000, 3500,
+        2000, 2500, 3000, 3500, 2000, 2500, 3000, 3500,
+        2000, 2500, 3000, 3500, 2000, 2500, 3000, 3500,
+        2000, 2500, 3000, 3500, 2000, 2500, 3000, 3500,
+        2000, 2500, 3000, 3500, 2000, 2500, 3000, 3500
+    ];
+    
+    // Track current trial index for timing sequence
+    var trial_counter_qualtrics = 0;
+    
     var fixation = {
         type: jsPsychHtmlKeyboardResponse,
         stimulus: '<div style="font-size:60px;">+</div>',
@@ -335,12 +379,28 @@ function initExp(){
             task: 'fixation'
         },
         trial_duration: function(){
-            var duration = jsPsych.randomization.sampleWithoutReplacement([500, 750, 1000], 1)[0];
-            console.log('[GNG-Qualtrics] Fixation duration:', duration + 'ms');
+            var index = trial_counter_qualtrics;
+            var duration = fixation_sequence_qualtrics[index % fixation_sequence_qualtrics.length];
+            console.log('[GNG-Qualtrics] Fixation duration:', duration + 'ms', '(index:', index + ')');
             return duration;
         },
         on_start: function() {
-            console.log('[GNG-Qualtrics] Fixation cross displayed');
+            var index = trial_counter_qualtrics;
+            var duration = fixation_sequence_qualtrics[index % fixation_sequence_qualtrics.length];
+            console.log('[GNG-Qualtrics] Fixation cross displayed (trial', index + ')');
+            // Store timing data for MRI alignment
+            var trial = jsPsych.getCurrentTrial();
+            if (trial && trial.data) {
+                trial.data.fixation_duration = duration;
+                trial.data.trial_sequence_index = index;
+            }
+        },
+        on_finish: function(data) {
+            var index = trial_counter_qualtrics;
+            var duration = fixation_sequence_qualtrics[index % fixation_sequence_qualtrics.length];
+            data.fixation_duration = duration;
+            data.trial_sequence_index = index;
+            // Don't increment here - increment after test_block finishes
         }
     };
     var test_block = {
@@ -348,8 +408,11 @@ function initExp(){
         stimulus: jsPsych.timelineVariable('stimulus'),
         choices: ['1'],
         trial_duration: function(){
-            var duration = jsPsych.randomization.sampleWithoutReplacement([2000, 2500, 3000, 3500], 1)[0];
-            console.log('[GNG-Qualtrics] Stimulus duration:', duration + 'ms');
+            // Use fixed stimulus duration sequence
+            // Use same index as fixation (they're a pair)
+            var index = trial_counter_qualtrics;
+            var duration = stimulus_sequence_qualtrics[index % stimulus_sequence_qualtrics.length];
+            console.log('[GNG-Qualtrics] Stimulus duration:', duration + 'ms', '(index:', index + ')');
             return duration;
         },
         response_ends_trial: false,
@@ -357,19 +420,83 @@ function initExp(){
         maintain_aspect_ratio: true,
         data: {
             task: 'response',
-            correct_response: jsPsych.timelineVariable('correct_response')
+            correct_response: jsPsych.timelineVariable('correct_response'),
+            response_type: jsPsych.timelineVariable('response')
+        },
+        on_load: function() {
+            // Prevent mouse clicks from advancing trials
+            var displayElement = document.getElementById('display_stage');
+            if (!displayElement) {
+                displayElement = document.querySelector('.jspsych-display-element');
+            }
+            if (displayElement) {
+                // Use capture phase to intercept clicks early
+                var clickHandler = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    console.log('[GNG-Qualtrics] Mouse click prevented on test trial');
+                    return false;
+                };
+                displayElement.addEventListener('click', clickHandler, true);
+                displayElement.addEventListener('mousedown', clickHandler, true);
+                displayElement.addEventListener('mouseup', clickHandler, true);
+                
+                // Also prevent clicks on images
+                var images = displayElement.querySelectorAll('img');
+                images.forEach(function(img) {
+                    img.style.pointerEvents = 'none';
+                    img.addEventListener('click', clickHandler, true);
+                });
+            }
         },
         on_start: function() {
             var trial = jsPsych.getCurrentTrial();
+            // Use same index as fixation (they're a pair)
+            var index = trial_counter_qualtrics;
+            var duration = stimulus_sequence_qualtrics[index % stimulus_sequence_qualtrics.length];
             var trialType = trial.data.correct_response !== null ? 'GO' : 'NO-GO';
             console.log('[GNG-Qualtrics] Stimulus displayed:', {
                 type: trialType,
                 stimulus: trial.stimulus,
-                expected_response: trial.data.correct_response || 'NO RESPONSE'
+                expected_response: trial.data.correct_response || 'NO RESPONSE',
+                duration: duration + 'ms',
+                index: index
             });
+            
+            // Store timing data for MRI alignment
+            if (trial && trial.data) {
+                trial.data.stimulus_duration = duration;
+                trial.data.trial_sequence_index = index;
+                trial.data.stimulus_type = trial.data.response_type;
+            }
+            
+            // Ensure pointer events are disabled on stimulus images
+            setTimeout(function() {
+                var displayStage = document.getElementById('display_stage');
+                var container = displayStage || document.querySelector('.jspsych-display-element');
+                if (container) {
+                    var images = container.querySelectorAll('img');
+                    images.forEach(function(img) {
+                        img.style.pointerEvents = 'none';
+                        img.style.cursor = 'default';
+                    });
+                }
+            }, 50);
         },
         on_finish: function(data){
+            // Use same index as fixation (they're a pair)
+            var index = trial_counter_qualtrics;
+            var duration = stimulus_sequence_qualtrics[index % stimulus_sequence_qualtrics.length];
             var trialType = data.correct_response !== null ? 'GO' : 'NO-GO';
+            
+            // Store timing data for MRI alignment
+            data.stimulus_duration = duration;
+            data.trial_sequence_index = index;
+            data.stimulus_type = data.response_type;
+            
+            // Increment counter after test_block finishes (both fixation and test_block done)
+            trial_counter_qualtrics++;
             
             // 1. Check if it is a GO trial (correct_response is '1')
             if (data.correct_response !== null) {
@@ -380,7 +507,9 @@ function initExp(){
                     response: data.response,
                     expected: data.correct_response,
                     correct: data.correct,
-                    rt: data.rt
+                    rt: data.rt,
+                    duration: duration + 'ms',
+                    index: index
                 });
             } 
             // 2. Otherwise, it is a NO-GO trial (correct_response is null)
@@ -392,7 +521,9 @@ function initExp(){
                     response: data.response,
                     expected: 'NO RESPONSE',
                     correct: data.correct,
-                    rt: data.rt || 'N/A'
+                    rt: data.rt || 'N/A',
+                    duration: duration + 'ms',
+                    index: index
                 });
             }
         }
@@ -425,31 +556,59 @@ function initExp(){
         stimulus: function() {
             // Get all trials labeled 'response'
             var trials = jsPsych.data.get().filter({task: 'response'});
+            var total = trials.count();
+            
+            // Error handling: check if we have any trials
+            if (total === 0) {
+                console.error('[GNG-Qualtrics] ERROR: No response trials found for debrief');
+                return '<p>No response trials found.</p><p>Press any key to complete the experiment.</p>';
+            }
             
             // Get only the correct ones
             var correct_trials = trials.filter({correct: true});
+            var correct_count = correct_trials.count();
             
             var go_trials = trials.filter({correct_response: '1'});
             var no_go_trials = trials.filter({correct_response: null});
             var go_correct = go_trials.filter({correct: true});
             var no_go_correct = no_go_trials.filter({correct: true});
             
-            // Calculate accuracy
-            var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
+            // Calculate accuracy with error handling
+            var accuracy = total > 0 ? Math.round((correct_count / total) * 100) : 0;
+            if (isNaN(accuracy)) {
+                accuracy = 0;
+            }
+            
+            // Calculate Go/No-Go specific accuracies with error handling
+            var go_count = go_trials.count();
+            var go_correct_count = go_correct.count();
+            var go_accuracy = go_count > 0 ? Math.round((go_correct_count / go_count) * 100) : 0;
+            if (isNaN(go_accuracy)) go_accuracy = 0;
+            
+            var no_go_count = no_go_trials.count();
+            var no_go_correct_count = no_go_correct.count();
+            var no_go_accuracy = no_go_count > 0 ? Math.round((no_go_correct_count / no_go_count) * 100) : 0;
+            if (isNaN(no_go_accuracy)) no_go_accuracy = 0;
             
             var stats = {
-                total_trials: trials.count(),
-                correct_trials: correct_trials.count(),
+                total_trials: total,
+                correct_trials: correct_count,
                 accuracy: accuracy + '%',
-                go_trials: go_trials.count(),
-                go_correct: go_correct.count(),
-                go_accuracy: Math.round(go_correct.count() / go_trials.count() * 100) + '%',
-                no_go_trials: no_go_trials.count(),
-                no_go_correct: no_go_correct.count(),
-                no_go_accuracy: Math.round(no_go_correct.count() / no_go_trials.count() * 100) + '%'
+                go_trials: go_count,
+                go_correct: go_correct_count,
+                go_accuracy: go_accuracy + '%',
+                no_go_trials: no_go_count,
+                no_go_correct: no_go_correct_count,
+                no_go_accuracy: no_go_accuracy + '%'
             };
             
             console.log('[GNG-Qualtrics] Debrief statistics:', stats);
+            console.log('[GNG-Qualtrics] Accuracy calculation debug:', {
+                total: total,
+                correct: correct_count,
+                accuracy: accuracy,
+                calculation: correct_count + ' / ' + total + ' * 100 = ' + accuracy + '%'
+            });
 
             return `<p>You responded correctly on <strong>${accuracy}%</strong> of the trials.</p>
                     <p>Press any key to complete the experiment. Thank you!</p>`;

@@ -253,11 +253,11 @@ The collected data enables:
 
 ### 7.1 Strengths
 
-✅ **Clear task structure**: Well-organized timeline
-✅ **MRI compatibility**: Appropriate timing and design
-✅ **Qualtrics integration**: Functional wrapper with error handling
-✅ **Data collection**: Comprehensive trial-level data
-✅ **Error handling**: Try-catch blocks and fallbacks in Qualtrics version
+**Clear task structure**: Well-organized timeline
+**MRI compatibility**: Appropriate timing and design
+**Qualtrics integration**: Functional wrapper with error handling
+**Data collection**: Comprehensive trial-level data
+**Error handling**: Try-catch blocks and fallbacks in Qualtrics version
 
 ### 7.2 Issues & Concerns
 
@@ -309,10 +309,10 @@ The collected data enables:
 
 ### 8.1 Task Validity
 
-✅ **Appropriate paradigm**: Go/No-Go is well-established
-✅ **Clear instructions**: Visual examples provided
-✅ **Adequate trial count**: 40-80 trials provides sufficient power
-✅ **Timing variability**: Jittered durations reduce anticipation
+**Appropriate paradigm**: Go/No-Go is well-established
+**Clear instructions**: Visual examples provided
+**Adequate trial count**: 40-80 trials provides sufficient power
+**Timing variability**: Jittered durations reduce anticipation
 
 ### 8.2 Potential Improvements
 

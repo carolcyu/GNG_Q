@@ -295,9 +295,134 @@ To modify the task:
 4. **Modify instructions**: Edit instruction trial `stimulus` fields
 5. **Change response keys**: Update `choices` parameter in test_block
 
-### Testing
+## Testing
 
-Before deploying:
+The project includes a comprehensive test suite using Playwright for automated testing of scientific validity, timing accuracy, data integrity, and cross-browser compatibility.
+
+### Prerequisites
+
+- Node.js (version 14 or higher)
+- npm (comes with Node.js)
+- Python 3 (for local web server, optional)
+
+### Installation
+
+1. Install project dependencies:
+```bash
+npm install
+```
+
+2. Install Playwright browsers:
+```bash
+npx playwright install
+```
+
+This will download Chromium, Firefox, and WebKit browsers needed for testing.
+
+### Running Tests
+
+#### Run All Tests
+
+Execute the complete test suite:
+```bash
+npm test
+```
+
+#### Run Specific Test Suites
+
+Run tests by category:
+
+```bash
+# Scientific validity tests (Go/No-Go trials, accuracy)
+npm run test:scientific
+
+# Timing accuracy tests
+npm run test:timing
+
+# Data integrity tests
+npm run test:data
+
+# Standalone integration tests
+npm run test:standalone
+
+# Cross-browser compatibility tests
+npm run test:browser
+```
+
+#### Test Execution Modes
+
+**Headed Mode** (see browser during tests):
+```bash
+npm run test:headed
+```
+
+**UI Mode** (interactive test runner):
+```bash
+npm run test:ui
+```
+
+**Debug Mode** (step through tests):
+```bash
+npm run test:debug
+```
+
+#### View Test Reports
+
+After running tests, view the HTML report:
+```bash
+npm run test:report
+```
+
+### Test Structure
+
+The test suite is organized into the following directories:
+
+- **tests/scientific/**: Tests for scientific validity
+  - Go trial validity (correct responses, incorrect responses)
+  - No-Go trial validity (response withholding)
+  - Accuracy calculation
+  - Fixed timing sequences
+
+- **tests/performance/**: Tests for timing accuracy
+  - Fixation duration validation
+  - Stimulus duration validation
+  - Timing sequence verification
+  - Trial timing precision
+
+- **tests/data-integrity/**: Tests for data collection
+  - Data structure validation
+  - Data completeness checks
+  - Required field verification
+  - JSON format validation
+
+- **tests/integration/**: Full integration tests
+  - Complete experiment flow
+  - MRI trigger functionality
+  - Standalone version end-to-end
+
+- **tests/browser/**: Cross-browser compatibility
+  - Chrome compatibility
+  - Firefox compatibility
+  - Safari compatibility
+
+- **tests/fixtures/**: Test utilities and data
+  - Helper functions
+  - Test data and expected sequences
+  - Mock responses
+
+### Test Configuration
+
+Tests are configured in `playwright.config.js`. The default configuration:
+- Uses local web server on port 8000 (automatically started)
+- Tests in Chromium, Firefox, and WebKit browsers
+- Generates HTML reports in `playwright-report/`
+- Captures screenshots on test failures
+- Records video on test failures
+- Timeout: 60 seconds per test
+
+### Manual Testing
+
+Before deploying, also perform manual testing:
 
 1. Test in target browser(s)
 2. Verify keyboard responses work correctly
@@ -306,6 +431,56 @@ Before deploying:
 5. Verify accuracy calculation
 6. Test with slow network connections
 7. Validate Qualtrics integration (if using)
+
+### Continuous Integration
+
+For CI/CD pipelines, tests can be run in headless mode:
+
+```bash
+CI=true npm test
+```
+
+The test suite will automatically:
+- Start a local web server
+- Run tests in headless mode
+- Generate reports
+- Exit with appropriate status codes
+
+### Test Coverage
+
+The test suite covers:
+
+- Scientific validity: Go/No-Go trial correctness, accuracy calculation
+- Timing accuracy: Fixation and stimulus durations within ±10ms tolerance
+- Data integrity: All required fields present, correct data types
+- Integration: Full experiment flow from start to finish
+- Cross-browser: Compatibility across major browsers
+- MRI integration: Scanner trigger functionality
+- Error handling: Edge cases and error conditions
+
+### Troubleshooting Tests
+
+**Issue: Tests fail to start**
+- Solution: Ensure Node.js and npm are installed
+- Verify Playwright browsers are installed: `npx playwright install`
+- Check that port 8000 is available
+
+**Issue: Local server fails to start**
+- Solution: Ensure Python 3 is installed
+- Try manually starting server: `python3 -m http.server 8000`
+- Check firewall settings
+
+**Issue: Tests timeout**
+- Solution: Increase timeout in `playwright.config.js`
+- Check network connectivity
+- Verify test files are accessible
+
+**Issue: Browser-specific test failures**
+- Solution: Reinstall browsers: `npx playwright install --force`
+- Check browser compatibility with Playwright version
+- Review browser-specific test logs
+
+For more detailed test documentation, see `tests/README.md`.
 
 ## Version Information
 

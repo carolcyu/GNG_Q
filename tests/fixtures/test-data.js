@@ -1,0 +1,81 @@
+/**
+ * Test Data and Mock Responses for GNG Task Testing
+ */
+
+// Fixed timing sequences (must match implementation)
+const FIXATION_SEQUENCE_STANDALONE = [
+    500, 1000, 250, 1750, 750, 1500, 1250, 2000,
+    250, 1000, 500, 1500, 750, 1750, 1250, 2000,
+    500, 750, 1000, 1250, 250, 1500, 1750, 2000,
+    750, 1000, 500, 2000, 250, 1250, 1500, 1750,
+    1000, 500, 750, 1500, 250, 1250, 1750, 2000
+];
+
+const STIMULUS_SEQUENCE_STANDALONE = Array(40).fill(1000);
+
+const FIXATION_SEQUENCE_QUALTRICS = [
+    500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500,
+    750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750,
+    1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000,
+    500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500,
+    750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750, 1000, 500, 750
+];
+
+const STIMULUS_SEQUENCE_QUALTRICS = [
+    2000, 2500, 3000, 3500, 2000, 2500, 3000, 3500,
+    2000, 2500, 3000, 3500, 2000, 2500, 3000, 3500,
+    2000, 2500, 3000, 3500, 2000, 2500, 3000, 3500,
+    2000, 2500, 3000, 3500, 2000, 2500, 3000, 3500,
+    2000, 2500, 3000, 3500, 2000, 2500, 3000, 3500,
+    2000, 2500, 3000, 3500, 2000, 2500, 3000, 3500,
+    2000, 2500, 3000, 3500, 2000, 2500, 3000, 3500,
+    2000, 2500, 3000, 3500, 2000, 2500, 3000, 3500,
+    2000, 2500, 3000, 3500, 2000, 2500, 3000, 3500,
+    2000, 2500, 3000, 3500, 2000, 2500, 3000, 3500
+];
+
+// Expected trial counts
+const EXPECTED_TRIALS = {
+    standalone: {
+        total: 40,
+        response: 40,
+        fixation: 40
+    },
+    qualtrics: {
+        total: 80,
+        response: 80,
+        fixation: 80
+    }
+};
+
+// Valid timing values
+const VALID_FIXATION_DURATIONS_STANDALONE = [250, 500, 750, 1000, 1250, 1500, 1750, 2000];
+const VALID_FIXATION_DURATIONS_QUALTRICS = [500, 750, 1000];
+const VALID_STIMULUS_DURATIONS_QUALTRICS = [2000, 2500, 3000, 3500];
+
+// Response keys
+const RESPONSE_KEYS = {
+    standalone: 'f',
+    qualtrics: '1',
+    mri_trigger: '5'
+};
+
+// Stimulus patterns
+const STIMULUS_PATTERN_QUALTRICS = [
+    'go', 'no-go', 'go', 'go', 'no-go', 'go', 'no-go', 'go',
+    'go', 'go', 'no-go', 'go', 'go', 'go', 'no-go', 'no-go'
+];
+
+module.exports = {
+    FIXATION_SEQUENCE_STANDALONE,
+    STIMULUS_SEQUENCE_STANDALONE,
+    FIXATION_SEQUENCE_QUALTRICS,
+    STIMULUS_SEQUENCE_QUALTRICS,
+    EXPECTED_TRIALS,
+    VALID_FIXATION_DURATIONS_STANDALONE,
+    VALID_FIXATION_DURATIONS_QUALTRICS,
+    VALID_STIMULUS_DURATIONS_QUALTRICS,
+    RESPONSE_KEYS,
+    STIMULUS_PATTERN_QUALTRICS
+};
+

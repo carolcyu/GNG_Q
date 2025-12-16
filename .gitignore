@@ -170,3 +170,10 @@ ENV/
 # Project-specific
 # Add any project-specific files to ignore here
 
+# Test results and reports
+test-results/
+playwright-report/
+playwright/.cache/
+tests/reports/
+*.log
+

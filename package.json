@@ -1,0 +1,31 @@
+{
+  "name": "gng-q",
+  "version": "1.0.0",
+  "description": "Go/No-Go cognitive task for MRI/fMRI studies",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:standalone": "playwright test tests/integration/standalone.test.js",
+    "test:scientific": "playwright test tests/scientific/",
+    "test:timing": "playwright test tests/performance/",
+    "test:data": "playwright test tests/data-integrity/",
+    "test:browser": "playwright test tests/browser/",
+    "test:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0"
+  },
+  "keywords": [
+    "cognitive-task",
+    "go-no-go",
+    "mri",
+    "fmri",
+    "jspsych",
+    "qualtrics"
+  ],
+  "author": "",
+  "license": "ISC"
+}
+

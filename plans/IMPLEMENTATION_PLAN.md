@@ -316,12 +316,12 @@ var test_procedure = {
 
 ## Success Criteria
 
-✅ All 80 trials complete without mouse clicks advancing trials  
-✅ Accuracy percentage displays correctly  
-✅ Timing sequences are fixed and documented  
-✅ Trial data includes all fields needed for MRI alignment  
-✅ Experiment runs identically for all participants (same timing)  
-✅ Both Qualtrics and standalone versions work correctly  
+All 80 trials complete without mouse clicks advancing trials  
+Accuracy percentage displays correctly  
+Timing sequences are fixed and documented  
+Trial data includes all fields needed for MRI alignment  
+Experiment runs identically for all participants (same timing)  
+Both Qualtrics and standalone versions work correctly  
 
 ---
 

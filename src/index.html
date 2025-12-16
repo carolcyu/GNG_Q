@@ -47,6 +47,19 @@ var jsPsych = initJsPsych({
             go_trials: responseTrials.filter({correct_response: 'f'}).count(),
             no_go_trials: responseTrials.filter({correct_response: null}).count()
         });
+        
+        // Add timing sequence configuration to data for MRI alignment reference
+        var timingConfig = {
+            fixation_sequence: fixation_sequence_standalone,
+            stimulus_sequence: stimulus_sequence_standalone,
+            version: 'standalone',
+            total_trials: 40
+        };
+        jsPsych.data.addProperties({
+            timing_config: timingConfig
+        });
+        
+        console.log('[GNG] Timing configuration saved:', timingConfig);
         jsPsych.data.displayData();
     }
 }); 
@@ -139,20 +152,54 @@ timeline.push(MRIstart);
         {stimulus: "img/orange.png", data: {response: 'no-go'}, correct_response: null}
     ];
     
+    /* Fixed timing sequences for MRI alignment (same for all participants) */
+    // Standalone version: 40 trials (20 reps × 2 stimuli)
+    // Fixation durations: 250, 500, 750, 1000, 1250, 1500, 1750, 2000ms
+    // Pattern repeats to cover 40 trials
+    var fixation_sequence_standalone = [
+        500, 1000, 250, 1750, 750, 1500, 1250, 2000,
+        250, 1000, 500, 1500, 750, 1750, 1250, 2000,
+        500, 750, 1000, 1250, 250, 1500, 1750, 2000,
+        750, 1000, 500, 2000, 250, 1250, 1500, 1750,
+        1000, 500, 750, 1500, 250, 1250, 1750, 2000
+    ];
+    
+    // Stimulus duration is fixed at 1000ms for standalone
+    var stimulus_sequence_standalone = Array(40).fill(1000);
+    
+    // Track current trial index for timing sequence
+    var trial_counter = 0;
+    
     var fixation = {
         type: jsPsychHtmlKeyboardResponse,
         stimulus: '<div style="font-size:60px;">+</div>',
         choices: "NO_KEYS",
         trial_duration: function(){
-            var duration = jsPsych.randomization.sampleWithoutReplacement([250, 500, 750, 1000, 1250, 1500, 1750, 2000], 1)[0];
-            console.log('[GNG] Fixation duration:', duration + 'ms');
+            var index = trial_counter;
+            var duration = fixation_sequence_standalone[index % fixation_sequence_standalone.length];
+            console.log('[GNG] Fixation duration:', duration + 'ms', '(index:', index + ')');
             return duration;
         },
         data: {
             task: 'fixation'
         },
         on_start: function() {
-            console.log('[GNG] Fixation cross displayed');
+            var index = trial_counter;
+            var duration = fixation_sequence_standalone[index % fixation_sequence_standalone.length];
+            console.log('[GNG] Fixation cross displayed (trial', index + ')');
+            // Store timing data for MRI alignment
+            var trial = jsPsych.getCurrentTrial();
+            if (trial && trial.data) {
+                trial.data.fixation_duration = duration;
+                trial.data.trial_sequence_index = index;
+            }
+        },
+        on_finish: function(data) {
+            var index = trial_counter;
+            var duration = fixation_sequence_standalone[index % fixation_sequence_standalone.length];
+            data.fixation_duration = duration;
+            data.trial_sequence_index = index;
+            // Don't increment here - increment after test_block finishes
         }
     };
 
@@ -160,22 +207,87 @@ timeline.push(MRIstart);
         type: jsPsychImageKeyboardResponse,
         stimulus: jsPsych.timelineVariable('stimulus'),
         choices: ['F'],
-        trial_duration: 1000,
+        trial_duration: function() {
+            // Use fixed stimulus duration (1000ms for standalone)
+            // Use same index as fixation (they're a pair)
+            var index = trial_counter;
+            var duration = stimulus_sequence_standalone[index % stimulus_sequence_standalone.length];
+            console.log('[GNG] Stimulus duration:', duration + 'ms', '(index:', index + ')');
+            return duration;
+        },
+        response_ends_trial: false,
         data: {
             task: 'response',
-            correct_response: jsPsych.timelineVariable('correct_response')
+            correct_response: jsPsych.timelineVariable('correct_response'),
+            response_type: jsPsych.timelineVariable('response')
+        },
+        on_load: function() {
+            // Prevent mouse clicks from advancing trials
+            var displayElement = document.querySelector('.jspsych-display-element');
+            if (displayElement) {
+                // Use capture phase to intercept clicks early
+                var clickHandler = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    console.log('[GNG] Mouse click prevented on test trial');
+                    return false;
+                };
+                displayElement.addEventListener('click', clickHandler, true);
+                displayElement.addEventListener('mousedown', clickHandler, true);
+                displayElement.addEventListener('mouseup', clickHandler, true);
+                
+                // Also prevent clicks on images
+                var images = displayElement.querySelectorAll('img');
+                images.forEach(function(img) {
+                    img.style.pointerEvents = 'none';
+                    img.addEventListener('click', clickHandler, true);
+                });
+            }
         },
         on_start: function() {
             var trial = jsPsych.getCurrentTrial();
+            // Use same index as fixation (they're a pair)
+            var index = trial_counter;
+            var duration = stimulus_sequence_standalone[index % stimulus_sequence_standalone.length];
             var trialType = trial.data.correct_response !== null ? 'GO' : 'NO-GO';
             console.log('[GNG] Stimulus displayed:', {
                 type: trialType,
                 stimulus: trial.stimulus,
-                expected_response: trial.data.correct_response || 'NO RESPONSE'
+                expected_response: trial.data.correct_response || 'NO RESPONSE',
+                duration: duration + 'ms',
+                index: index
             });
+            
+            // Store timing data for MRI alignment
+            if (trial && trial.data) {
+                trial.data.stimulus_duration = duration;
+                trial.data.trial_sequence_index = index;
+                trial.data.stimulus_type = trial.data.response_type;
+            }
+            
+            // Ensure pointer events are disabled on stimulus images
+            setTimeout(function() {
+                var images = document.querySelectorAll('.jspsych-display-element img');
+                images.forEach(function(img) {
+                    img.style.pointerEvents = 'none';
+                    img.style.cursor = 'default';
+                });
+            }, 50);
         },
         on_finish: function(data){
+            // Use same index as fixation (they're a pair)
+            var index = trial_counter;
+            var duration = stimulus_sequence_standalone[index % stimulus_sequence_standalone.length];
             var trialType = data.correct_response !== null ? 'GO' : 'NO-GO';
+            
+            // Store timing data for MRI alignment
+            data.stimulus_duration = duration;
+            data.trial_sequence_index = index;
+            data.stimulus_type = data.response_type;
+            
+            // Increment counter after test_block finishes (both fixation and test_block done)
+            trial_counter++;
             
             // Check if it is a GO trial (correct_response is 'f')
             if (data.correct_response !== null) {
@@ -186,7 +298,9 @@ timeline.push(MRIstart);
                     response: data.response,
                     expected: data.correct_response,
                     correct: data.correct,
-                    rt: data.rt
+                    rt: data.rt,
+                    duration: duration + 'ms',
+                    index: index
                 });
             } 
             // Otherwise, it is a NO-GO trial (correct_response is null)
@@ -198,7 +312,9 @@ timeline.push(MRIstart);
                     response: data.response,
                     expected: 'NO RESPONSE',
                     correct: data.correct,
-                    rt: data.rt || 'N/A'
+                    rt: data.rt || 'N/A',
+                    duration: duration + 'ms',
+                    index: index
                 });
             }
         }
@@ -234,32 +350,66 @@ timeline.push(test_procedure);
         type: jsPsychHtmlKeyboardResponse,
         stimulus: function() {
             var trials = jsPsych.data.get().filter({task: 'response'});
+            var total = trials.count();
+            
+            // Error handling: check if we have any trials
+            if (total === 0) {
+                console.error('[GNG] ERROR: No response trials found for debrief');
+                return '<p>No response trials found.</p><p>Press any key to complete the experiment.</p>';
+            }
+            
             var correct_trials = trials.filter({correct: true});
+            var correct_count = correct_trials.count();
             var go_trials = trials.filter({correct_response: 'f'});
             var no_go_trials = trials.filter({correct_response: null});
             var go_correct = go_trials.filter({correct: true});
             var no_go_correct = no_go_trials.filter({correct: true});
             
-            var accuracy = Math.round(correct_trials.count() / trials.count() * 100);
-            var rt = Math.round(correct_trials.select('rt').mean());
+            // Calculate accuracy with error handling
+            var accuracy = total > 0 ? Math.round((correct_count / total) * 100) : 0;
+            if (isNaN(accuracy)) {
+                accuracy = 0;
+            }
+            
+            // Calculate RT with error handling (only for correct Go trials)
+            var go_correct_rt = go_correct.select('rt').mean();
+            var rt = go_correct_rt && !isNaN(go_correct_rt) ? Math.round(go_correct_rt) : 0;
+            
+            // Calculate Go/No-Go specific accuracies with error handling
+            var go_count = go_trials.count();
+            var go_correct_count = go_correct.count();
+            var go_accuracy = go_count > 0 ? Math.round((go_correct_count / go_count) * 100) : 0;
+            if (isNaN(go_accuracy)) go_accuracy = 0;
+            
+            var no_go_count = no_go_trials.count();
+            var no_go_correct_count = no_go_correct.count();
+            var no_go_accuracy = no_go_count > 0 ? Math.round((no_go_correct_count / no_go_count) * 100) : 0;
+            if (isNaN(no_go_accuracy)) no_go_accuracy = 0;
             
             var stats = {
-                total_trials: trials.count(),
-                correct_trials: correct_trials.count(),
+                total_trials: total,
+                correct_trials: correct_count,
                 accuracy: accuracy + '%',
-                avg_rt: rt + 'ms',
-                go_trials: go_trials.count(),
-                go_correct: go_correct.count(),
-                go_accuracy: Math.round(go_correct.count() / go_trials.count() * 100) + '%',
-                no_go_trials: no_go_trials.count(),
-                no_go_correct: no_go_correct.count(),
-                no_go_accuracy: Math.round(no_go_correct.count() / no_go_trials.count() * 100) + '%'
+                avg_rt: rt > 0 ? rt + 'ms' : 'N/A',
+                go_trials: go_count,
+                go_correct: go_correct_count,
+                go_accuracy: go_accuracy + '%',
+                no_go_trials: no_go_count,
+                no_go_correct: no_go_correct_count,
+                no_go_accuracy: no_go_accuracy + '%'
             };
             
             console.log('[GNG] Debrief statistics:', stats);
+            console.log('[GNG] Accuracy calculation debug:', {
+                total: total,
+                correct: correct_count,
+                accuracy: accuracy,
+                calculation: correct_count + ' / ' + total + ' * 100 = ' + accuracy + '%'
+            });
 
-            return `<p>You responded correctly on ${accuracy}% of the trials.</p>
-                    <p>Your average response time was ${rt}ms.</p>
+            var rtText = rt > 0 ? `<p>Your average response time was ${rt}ms.</p>` : '';
+            return `<p>You responded correctly on <strong>${accuracy}%</strong> of the trials.</p>
+                    ${rtText}
                     <p>Press any key to complete the experiment. Thank you!</p>`;
         }
     };
