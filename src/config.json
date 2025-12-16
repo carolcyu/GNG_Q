@@ -1,0 +1,44 @@
+{
+    "task_name": "Go/No-Go Task",
+    "version": "1.0",
+    "description": "Go/No-Go cognitive task for MRI/fMRI studies",
+    "stimuli": {
+        "go": {
+            "image": "img/blue.png",
+            "response_key": "f",
+            "instruction": "Press the F key"
+        },
+        "no_go": {
+            "image": "img/orange.png",
+            "response_key": null,
+            "instruction": "Do not press any key"
+        }
+    },
+    "timing": {
+        "fixation_durations": [250, 500, 750, 1000, 1250, 1500, 1750, 2000],
+        "fixation_durations_qualtrics": [500, 750, 1000],
+        "stimulus_duration_standalone": 1000,
+        "stimulus_durations_qualtrics": [2000, 2500, 3000, 3500],
+        "post_trial_gap": 1000
+    },
+    "trials": {
+        "standalone": {
+            "stimuli_count": 2,
+            "repetitions": 20,
+            "total_trials": 40,
+            "randomize": true
+        },
+        "qualtrics": {
+            "stimuli_count": 16,
+            "repetitions": 5,
+            "total_trials": 80,
+            "randomize": false,
+            "go_ratio": 0.7
+        }
+    },
+    "mri": {
+        "trigger_key": "5",
+        "wait_message": "Please wait while the scanner starts up. This will take 10 seconds."
+    },
+    "github_url": "https://carolcyu.github.io/GNG_Q/"
+}
